@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""
+Единая точка входа установщика.
+
+Автоматически выбирает "родной" UI под текущее окружение (чтобы установщик
+не выглядел инородно): Kirigami под KDE, GTK4/libadwaita под GNOME.
+Если ни то, ни другое не обнаружено (например, запуск по SSH или в
+минимальном live-окружении без графики) — падает обратно на CLI-визард.
+
+Флаг --debug/--dry-run передаётся насквозь в любой из UI и отключает
+любую запись на диск (см. installer/core/executor.py).
+
+Использование:
+    ./bin/arch-installer                # автоопределение
+    ./bin/arch-installer --debug        # автоопределение, без записи на диск
+    ./bin/arch-installer --ui=cli       # принудительно текстовый визард
+    ./bin/arch-installer --ui=kirigami
+    ./bin/arch-installer --ui=gnome
+"""
+import argparse
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from installer.frontend_common.detect_de import detect  # noqa: E402
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--ui", choices=["auto", "kirigami", "gnome", "cli"], default="auto",
+        help="Какой интерфейс запустить (по умолчанию — автоопределение по DE).",
+    )
+    args, rest = parser.parse_known_args()
+
+    ui = args.ui
+    if ui == "auto":
+        de = detect()
+        ui = {"kde": "kirigami", "gnome": "gnome"}.get(de, "cli")
+
+    if ui == "kirigami":
+        try:
+            from installer.gui_kirigami.main import main as run
+        except ImportError:
+            print("PySide6/Kirigami недоступны, переключаюсь на CLI-визард.", file=sys.stderr)
+            from installer.cli.wizard import run_wizard as run
+    elif ui == "gnome":
+        try:
+            from installer.gui_gnome.main import main as run
+        except ImportError:
+            print("GTK4/libadwaita недоступны, переключаюсь на CLI-визард.", file=sys.stderr)
+            from installer.cli.wizard import run_wizard as run
+    else:
+        from installer.cli.wizard import run_wizard as run
+
+    return run(rest)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

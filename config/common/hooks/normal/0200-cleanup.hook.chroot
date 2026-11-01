@@ -1,0 +1,17 @@
+#!/bin/sh
+# Shrink the image and remove build-only state.
+set -eu
+
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+rm -rf /var/cache/apt/archives/*.deb
+rm -rf /tmp/* /var/tmp/*
+rm -rf /root/.cache
+rm -rf /home/*/.cache
+
+# Keep copyright files (required by policy) but drop the rest of the docs.
+find /usr/share/doc -type f ! -name copyright -delete 2>/dev/null || true
+find /usr/share/doc -type l -delete 2>/dev/null || true
+
+# Empty logs; the live session will create fresh ones.
+find /var/log -type f -exec truncate -s 0 {} + 2>/dev/null || true

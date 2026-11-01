@@ -1,0 +1,48 @@
+#!/bin/sh
+# DebLite identity.
+set -eu
+
+cat >/etc/deblite-release <<'EOF'
+DebLite 13 (trixie)
+A lean Debian 13 desktop distribution.
+https://github.com/deblite/deblite
+EOF
+
+cat >/etc/os-release <<'EOF'
+PRETTY_NAME="DebLite 13 (trixie)"
+NAME="DebLite"
+VERSION_ID="13"
+VERSION="13 (trixie)"
+VERSION_CODENAME=trixie
+ID=deblite
+ID_LIKE=debian
+HOME_URL="https://github.com/deblite/deblite"
+SUPPORT_URL="https://github.com/deblite/deblite/issues"
+BUG_REPORT_URL="https://github.com/deblite/deblite/issues"
+EOF
+cp /etc/os-release /usr/lib/os-release
+
+cat >/etc/lsb-release <<'EOF'
+DISTRIB_ID=DebLite
+DISTRIB_RELEASE=13
+DISTRIB_CODENAME=trixie
+DISTRIB_DESCRIPTION="DebLite 13 (trixie)"
+EOF
+
+cat >/etc/issue <<'EOF'
+DebLite GNU/Linux 13 \n \l
+
+EOF
+
+cat >/etc/motd <<'EOF'
+Welcome to DebLite 13 (trixie).
+
+The graphical installer starts automatically. If it does not, run:
+
+    sudo deblite-installer --gui
+
+For a text-mode install:
+
+    sudo deblite-installer
+
+EOF

@@ -1,0 +1,32 @@
+# KDE Plasma edition
+kde-plasma-desktop
+plasma-desktop
+plasma-workspace
+plasma-nm
+plasma-pa
+bluedevil
+dolphin
+konsole
+kate
+ark
+kde-spectacle
+kde-config-gtk-style
+breeze-icon-theme
+sddm
+sddm-theme-breeze
+polkit-kde-agent-1
+xdg-desktop-portal-kde
+kwin-x11
+kwin-wayland
+xwayland
+kde-cli-tools
+udisks2
+upower
+
+# X11 stack
+xserver-xorg
+xserver-xorg-input-libinput
+xserver-xorg-video-all
+x11-xserver-utils
+x11-utils
+x11-xkb-utils

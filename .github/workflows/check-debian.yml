@@ -1,0 +1,44 @@
+name: check-debian
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: detect Debian point release
+        id: check
+        run: ./scripts/check-debian-release.sh
+
+      - name: tag a new point release
+        if: steps.check.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.check.outputs.debian_version }}"
+          tag="v$version"
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "$tag already exists; nothing to do"
+            exit 0
+          fi
+
+          echo "$version" >debian-version.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add debian-version.txt
+          git commit -m "track Debian $version"
+          git push
+          git tag "$tag"
+          git push origin "$tag"

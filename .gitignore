@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Build output
+/build/
+/out/
+*.iso
+*.iso.zst
+*.iso.xz
+*.squashfs
+*.deb
+*.part
+
+# Local scratch
+/tmp/
+/.cache/
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

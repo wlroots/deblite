@@ -1,0 +1,39 @@
+# Cinnamon edition with Mint-Y
+cinnamon
+nemo
+cinnamon-settings-daemon
+cinnamon-control-center
+cinnamon-session
+muffin
+network-manager-gnome
+blueman
+pavucontrol
+gnome-terminal
+file-roller
+
+# Mint theming. mint-y-icons is in Debian; mint-themes is vendored from the
+# upstream release by scripts/fetch-vendor-debs.sh.
+mint-y-icons
+dconf-cli
+
+# Display manager and polkit
+lightdm
+slick-greeter
+mate-polkit
+
+# Cinnamon's recommended integration bits, without the meta packages
+xdg-desktop-portal-gtk
+xdg-desktop-portal-xapp
+libxapp-gtk3-module
+metacity-common
+xapp-sn-watcher
+libcanberra-pulse
+
+# X11 stack
+dbus-x11
+xserver-xorg
+xserver-xorg-input-libinput
+xserver-xorg-video-all
+x11-xserver-utils
+x11-utils
+x11-xkb-utils

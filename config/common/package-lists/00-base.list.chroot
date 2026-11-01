@@ -1,0 +1,101 @@
+# DebLite base system — shared by every edition.
+# Deliberately no recommends/suggests: live-build is configured with
+# --apt-recommends false and --no-install-recommends --no-install-suggests.
+
+# Kernel, firmware and microcode
+linux-image-amd64
+firmware-linux-free
+firmware-misc-nonfree
+firmware-iwlwifi
+firmware-amd-graphics
+firmware-intel-graphics
+firmware-intel-sound
+firmware-atheros
+firmware-brcm80211
+firmware-realtek
+firmware-mediatek
+firmware-libertas
+firmware-ipw2x00
+firmware-zd1211
+firmware-nvidia-graphics
+firmware-sof-signed
+firmware-ath9k-htc
+wireless-regdb
+bluez-firmware
+intel-microcode
+amd64-microcode
+
+# Boot, partitioning, filesystems
+initramfs-tools
+cryptsetup
+cryptsetup-initramfs
+gdisk
+parted
+dosfstools
+e2fsprogs
+xfsprogs
+btrfs-progs
+mtools
+rsync
+squashfs-tools
+grub2-common
+grub-efi-amd64-bin
+grub-pc-bin
+efibootmgr
+os-prober
+
+# Live session
+live-boot
+live-config
+live-config-systemd
+live-tools
+user-setup
+iproute2
+uuid-runtime
+
+# Core system
+systemd
+systemd-sysv
+dbus
+sudo
+locales
+console-setup
+keyboard-configuration
+tzdata
+ca-certificates
+curl
+wget
+gnupg
+bash-completion
+less
+htop
+neovim
+firewalld
+network-manager
+zram-tools
+systemd-timesyncd
+
+# Audio
+pipewire
+wireplumber
+pipewire-audio
+pipewire-pulse
+pipewire-alsa
+libspa-0.2-bluetooth
+alsa-topology-conf
+alsa-ucm-conf
+
+# Bluetooth
+bluez
+
+# Fonts and desktop integration
+fonts-noto
+fonts-noto-color-emoji
+fonts-dejavu-core
+fonts-liberation2
+xdg-user-dirs
+xdg-utils
+desktop-base
+
+# Required core application
+gimp

@@ -1,0 +1,19 @@
+[project]
+name = "arch-installer"
+version = "0.1.0"
+description = "Установщик Arch Linux с Kirigami/libadwaita фронтендами, pacstrap, LUKS, GRUB/Limine/UKI"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+kirigami = ["PySide6>=6.6"]
+gnome = ["PyGObject>=3.46"]
+
+[project.scripts]
+arch-installer = "installer.cli.wizard:run_wizard"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["installer*"]

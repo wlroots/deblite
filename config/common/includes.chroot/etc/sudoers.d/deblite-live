@@ -1,0 +1,3 @@
+# The live session account gets full sudo, as in every Debian live image.
+# The graphical installer only needs the scoped rule shipped by the package.
+user ALL=(ALL) NOPASSWD: ALL

@@ -1,0 +1,36 @@
+# XFCE edition with the Greybird theme
+xfce4
+xfce4-terminal
+thunar
+thunar-volman
+xfce4-power-manager
+xfce4-pulseaudio-plugin
+xfce4-screenshooter
+xfce4-notifyd
+xfce4-appfinder
+xfce4-clipman-plugin
+xfce4-taskmanager
+xfce4-systemload-plugin
+network-manager-gnome
+blueman
+pavucontrol
+
+# Theme
+greybird-gtk-theme
+elementary-xfce-icon-theme
+tango-icon-theme
+
+# Display manager and polkit
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+mate-polkit
+
+# X11 stack
+dbus-x11
+xserver-xorg
+xserver-xorg-input-libinput
+xserver-xorg-video-all
+x11-xserver-utils
+x11-utils
+x11-xkb-utils

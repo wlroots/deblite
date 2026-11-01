@@ -1,0 +1,58 @@
+#!/bin/sh
+# Install ONLYOFFICE Desktop Editors and Helium from their official apt
+# repositories. apt-key was removed in Trixie, so keys are dearmored into
+# /etc/apt/keyrings and referenced with signed-by= (never .key.chroot).
+set -eu
+export DEBIAN_FRONTEND=noninteractive
+
+echo "[deblite] adding third-party repositories"
+apt-get update
+apt-get install -y --no-install-recommends ca-certificates curl gnupg
+
+install -d -m 0755 /etc/apt/keyrings
+
+# Helium
+curl -fsSL --retry 3 https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc |
+    gpg --dearmor --yes -o /etc/apt/keyrings/helium.gpg
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" \
+    >/etc/apt/sources.list.d/helium.list
+
+# ONLYOFFICE. The repository still calls itself "squeeze"; that is intentional.
+curl -fsSL --retry 3 https://download.onlyoffice.com/repo/onlyoffice.key |
+    gpg --dearmor --yes -o /etc/apt/keyrings/onlyoffice.gpg
+echo "deb [signed-by=/etc/apt/keyrings/onlyoffice.gpg] https://download.onlyoffice.com/repo/debian squeeze main" \
+    >/etc/apt/sources.list.d/onlyoffice.list
+
+apt-get update
+
+# Trixie's t64 packages provide the pre-t64 names (libasound2, libgtk-3-0,
+# libatk1.0-0, libcups2), so ONLYOFFICE's dependency list resolves without
+# compatibility shims.
+echo "[deblite] installing Helium"
+if ! apt-get install -y --no-install-recommends helium-bin; then
+    echo "[deblite] Helium repository failed; falling back to the GitHub release" >&2
+    url=$(curl -fsSL --retry 3 https://api.github.com/repos/imputnet/helium-linux/releases/latest |
+        grep -oE 'https://[^"]+amd64\.deb' | head -1)
+    if [ -z "$url" ]; then
+        echo "[deblite] cannot locate a Helium amd64 .deb" >&2
+        exit 1
+    fi
+    curl -fL --retry 3 -o /tmp/helium.deb "$url"
+    apt-get install -y --no-install-recommends /tmp/helium.deb
+fi
+
+echo "[deblite] installing ONLYOFFICE Desktop Editors"
+if ! apt-get install -y --no-install-recommends onlyoffice-desktopeditors; then
+    echo "[deblite] ONLYOFFICE repository failed; falling back to the GitHub release" >&2
+    url=$(curl -fsSL --retry 3 https://api.github.com/repos/ONLYOFFICE/DesktopEditors/releases/latest |
+        grep -oE 'https://[^"]+amd64\.deb' | head -1)
+    if [ -z "$url" ]; then
+        echo "[deblite] cannot locate an ONLYOFFICE amd64 .deb" >&2
+        exit 1
+    fi
+    curl -fL --retry 3 -o /tmp/onlyoffice.deb "$url"
+    apt-get install -y --no-install-recommends /tmp/onlyoffice.deb
+fi
+
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/helium.deb /tmp/onlyoffice.deb
