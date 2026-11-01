@@ -121,6 +121,9 @@ jobs:
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="v${{ inputs.debian_version }}"
+          fi
           if [ -z "$tag" ] || [ "$tag" = "main" ]; then
             tag="v$(date -u +%Y.%m.%d)"
           fi

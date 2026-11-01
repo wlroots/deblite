@@ -236,3 +236,18 @@ def test_installed_packages_parser(tmp_path) -> None:
         "Package: gimp\nStatus: install ok installed\n"
     )
     assert _installed_packages(status) == {"live-boot", "gimp"}
+
+
+def test_non_admin_user_is_not_added_to_sudo(tmp_path) -> None:
+    from installer.core import system
+
+    cfg = InstallConfig()
+    cfg.mount_root = str(tmp_path)
+    (tmp_path / "etc").mkdir()
+    (tmp_path / "etc/group").write_text(
+        "root:x:0:\nsudo:x:27:deblite\naudio:x:29:\nvideo:x:44:\n"
+    )
+    assert system._user_groups(cfg) == ["sudo", "audio", "video"]
+
+    cfg.user.is_admin = False
+    assert system._user_groups(cfg) == ["audio", "video"]

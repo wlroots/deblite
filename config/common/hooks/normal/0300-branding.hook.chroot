@@ -8,7 +8,7 @@ A lean Debian 13 desktop distribution.
 https://github.com/deblite/deblite
 EOF
 
-cat >/etc/os-release <<'EOF'
+cat >/usr/lib/os-release <<'EOF'
 PRETTY_NAME="DebLite 13 (trixie)"
 NAME="DebLite"
 VERSION_ID="13"
@@ -20,7 +20,7 @@ HOME_URL="https://github.com/deblite/deblite"
 SUPPORT_URL="https://github.com/deblite/deblite/issues"
 BUG_REPORT_URL="https://github.com/deblite/deblite/issues"
 EOF
-cp /etc/os-release /usr/lib/os-release
+ln -sfn ../usr/lib/os-release /etc/os-release
 
 cat >/etc/lsb-release <<'EOF'
 DISTRIB_ID=DebLite

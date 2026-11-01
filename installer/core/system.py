@@ -89,11 +89,15 @@ def _user_exists(cfg: InstallConfig, ex: Executor, username: str) -> bool:
     return result.ok
 
 
+def _user_groups(cfg: InstallConfig) -> list[str]:
+    allowed = BASE_GROUPS if cfg.user.is_admin else tuple(g for g in BASE_GROUPS if g != "sudo")
+    return [g for g in allowed if g in _existing_groups(cfg)]
+
+
 def _users(cfg: InstallConfig, ex: Executor) -> None:
     root = cfg.mount_root
     username = cfg.user.username
-    allowed = BASE_GROUPS if cfg.user.is_admin else tuple(g for g in BASE_GROUPS if g != "sudo")
-    groups = [g for g in allowed if g in _existing_groups(cfg)]
+    groups = _user_groups(cfg)
     group_arg = ",".join(groups) if groups else ""
 
     if _user_exists(cfg, ex, username):

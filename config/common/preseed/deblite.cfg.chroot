@@ -1,0 +1,5 @@
+# Auto-accept the redistributable firmware licences. Both packages ship
+# hardware firmware that Debian already redistributes in non-free-firmware;
+# the debconf question is informational and cannot be shown in a batch build.
+firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true
+firmware-ivtv firmware-ivtv/license/accepted boolean true

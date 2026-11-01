@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   check:
@@ -42,3 +43,16 @@ jobs:
           git push
           git tag "$tag"
           git push origin "$tag"
+
+      # Pushes made with GITHUB_TOKEN do not start other workflows, so ask the
+      # build workflow explicitly. workflow_dispatch is exempt from that rule.
+      - name: build and publish the new point release
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run build.yml \
+            --ref main \
+            -f flavor=all \
+            -f debian_version="${{ steps.check.outputs.debian_version }}" \
+            -f release=true

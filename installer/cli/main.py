@@ -105,7 +105,8 @@ def _run_headless(args) -> int:
     if args.flavor:
         cfg.flavor = args.flavor
 
-    set_language(language_for_locale(cfg.locale.locale))
+    if not args.lang:
+        set_language(language_for_locale(cfg.locale.locale))
 
     if os.geteuid() != 0 and not args.debug:
         print(tr("cli.need_root"), file=sys.stderr)
