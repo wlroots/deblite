@@ -121,9 +121,11 @@ Every build runs:
 ```
 
 `verify-iso.sh` checks the squashfs for the kernel, initrd, apt, GRUB modules,
-the installer and the lean apt policy, and confirms that d-i/Calamares are
-absent. `audit-bloat.sh` parses `var/lib/dpkg/status` and fails on the
-denylist (LibreOffice, Thunderbird, GNOME extras, games, heavy meta-packages).
+the installer, the baked edition (`/etc/deblite-flavor`), the core applications
+(Neovim, GIMP, ONLYOFFICE, firewalld) and the lean apt policy, and confirms
+that d-i/Calamares are absent. `audit-bloat.sh` parses `var/lib/dpkg/status`
+and fails on the denylist (LibreOffice, Thunderbird, GNOME extras, games,
+heavy meta-packages).
 
 Set `DEBLITE_ALLOW_BLOAT=1` to turn the audit into warnings while debugging.
 
@@ -140,6 +142,16 @@ sudo apt-get install qemu-system-x86
 ./scripts/qemu-smoke.sh out/deblite-13-kde-amd64.iso
 ```
 
-This only checks that the ISO reaches a Linux/systemd boot banner. A full
-install test is manual: boot the ISO, run the wizard against a blank disk and
-reboot into the installed system.
+This only checks that the ISO reaches a Linux/systemd boot banner. For a real
+install test, run the installer against a loop-backed disk image:
+
+```sh
+sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso
+sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso --luks
+```
+
+The script partitions a sparse image, copies the ISO's squashfs, runs the
+headless installer, then mounts the result and checks GRUB, fstab, the user
+account, the hostname and that the live packages are gone. It forces the BIOS
+layout so it cannot write NVRAM entries on the build host. Test UEFI boot and
+the GRUB menu in a VM.

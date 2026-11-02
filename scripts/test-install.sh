@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+# Install the built ISO's rootfs onto a loop-backed disk image and check the
+# result. This exercises partitioning, unsquashfs, de-live, fstab, users and
+# GRUB without touching a real disk. UEFI is intentionally not tested here:
+# grub-install would write NVRAM entries on the build host. Use a VM for that.
+#
+# Usage:
+#   sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso [--luks]
+set -euo pipefail
+
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+ISO=${1:-}
+shift || true
+LUKS=0
+for arg in "$@"; do
+    case "$arg" in
+        --luks) LUKS=1 ;;
+        -h|--help)
+            echo "usage: $0 path/to/deblite.iso [--luks]" >&2
+            exit 0
+            ;;
+        *)
+            echo "unknown argument: $arg" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if [ -z "$ISO" ] || [ ! -f "$ISO" ]; then
+    echo "usage: $0 path/to/deblite.iso [--luks]" >&2
+    exit 2
+fi
+if [ "${EUID:-$(id -u)}" -ne 0 ]; then
+    echo "this test needs root (loop devices, mounts, chroot)" >&2
+    exit 2
+fi
+
+WORK=$(mktemp -d /tmp/deblite-install-test.XXXXXX)
+LOOP=""
+cleanup() {
+    set +e
+    umount -R "$WORK/target" 2>/dev/null
+    if [ "$LUKS" = "1" ]; then
+        cryptsetup close deblite-test-root 2>/dev/null
+    fi
+    if [ -n "$LOOP" ]; then
+        losetup -d "$LOOP" 2>/dev/null
+    fi
+    rm -rf "$WORK"
+}
+trap cleanup EXIT
+
+DISK="$WORK/disk.img"
+MOUNT_ROOT="$WORK/target"
+SQUASHFS="$WORK/filesystem.squashfs"
+
+echo "==> extracting filesystem.squashfs"
+xorriso -osirrox on -indev "$ISO" -extract /live/filesystem.squashfs "$SQUASHFS" >/dev/null 2>&1
+chmod +w "$SQUASHFS"
+
+echo "==> creating a 12 GiB sparse disk image"
+truncate -s 12G "$DISK"
+LOOP=$(losetup --find --show --partscan "$DISK")
+
+PASSPHRASE=""
+if [ "$LUKS" = "1" ]; then
+    PASSPHRASE="deblite-test-passphrase"
+fi
+
+CONFIG=$(mktemp)
+cat >"$CONFIG" <<EOF
+{
+  "flavor": "xfce",
+  "disk": {
+    "device": "$LOOP",
+    "mode": "erase_disk",
+    "firmware": "bios",
+    "esp_size_mib": 512,
+    "boot_size_mib": 1024,
+    "swap_size_mib": 0,
+    "filesystem": "ext4"
+  },
+  "luks": {"enabled": $([ "$LUKS" = 1 ] && echo true || echo false), "passphrase": "$PASSPHRASE"},
+  "user": {
+    "username": "tester",
+    "full_name": "DebLite Tester",
+    "password": "test-password",
+    "is_admin": true,
+    "root_password": "",
+    "autologin": false
+  },
+  "locale": {"locale": "en_US.UTF-8", "keymap": "us", "timezone": "UTC"},
+  "network": {"hostname": "deblite-test"},
+  "mount_root": "$MOUNT_ROOT",
+  "source": "$SQUASHFS",
+  "skip_delive": false,
+  "keep_live_user": false
+}
+EOF
+
+echo "==> running the installer"
+"$ROOT/bin/deblite-installer" --headless --config "$CONFIG" --yes
+
+echo "==> inspecting the installed system"
+ROOT_DEV=$(lsblk -no PATH,PARTLABEL "$LOOP" | awk '$2 == "DEBLITE_ROOT" { print $1 }')
+if [ -z "$ROOT_DEV" ]; then
+    echo "FAIL: cannot find the DEBLITE_ROOT partition" >&2
+    exit 1
+fi
+ROOT_PART=$ROOT_DEV
+if [ "$LUKS" = "1" ]; then
+    cryptsetup open --key-file <(printf '%s' "$PASSPHRASE") "$ROOT_DEV" deblite-test-root
+    ROOT_PART="/dev/mapper/deblite-test-root"
+fi
+
+mkdir -p "$MOUNT_ROOT"
+mount "$ROOT_PART" "$MOUNT_ROOT"
+
+fail=0
+check() {
+    if [ ! -e "$MOUNT_ROOT/$1" ]; then
+        echo "FAIL: missing /$1" >&2
+        fail=1
+    fi
+}
+check etc/fstab
+check etc/passwd
+check boot/grub/grub.cfg
+check usr/bin/apt
+
+if grep -q '^tester:' "$MOUNT_ROOT/etc/passwd"; then
+    :
+else
+    echo "FAIL: user tester was not created" >&2
+    fail=1
+fi
+
+if grep -q '^Package: live-boot$' "$MOUNT_ROOT/var/lib/dpkg/status" 2>/dev/null; then
+    echo "FAIL: live-boot is still installed on the target" >&2
+    fail=1
+fi
+
+if [ "$(cat "$MOUNT_ROOT/etc/hostname")" != "deblite-test" ]; then
+    echo "FAIL: hostname was not configured" >&2
+    fail=1
+fi
+
+if [ -f "$MOUNT_ROOT/etc/crypttab" ] && [ "$LUKS" = "1" ]; then
+    grep -q '^deblite-test-root\|^cryptroot' "$MOUNT_ROOT/etc/crypttab" ||
+        { echo "FAIL: crypttab is missing the root mapping" >&2; fail=1; }
+elif [ "$LUKS" = "1" ]; then
+    echo "FAIL: /etc/crypttab is missing" >&2
+    fail=1
+fi
+
+mountpoint -q "$MOUNT_ROOT/boot/efi" || true
+if [ -f "$MOUNT_ROOT/etc/fstab" ]; then
+    echo "--- /etc/fstab"
+    sed 's/^/    /' "$MOUNT_ROOT/etc/fstab"
+fi
+
+if [ "$fail" -ne 0 ]; then
+    echo "test-install: FAILED" >&2
+    exit 1
+fi
+echo "test-install: OK"
