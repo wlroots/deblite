@@ -148,10 +148,12 @@ install test, run the installer against a loop-backed disk image:
 ```sh
 sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso
 sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso --luks
+sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso --boot
 ```
 
 The script partitions a sparse image, copies the ISO's squashfs, runs the
 headless installer, then mounts the result and checks GRUB, fstab, the user
-account, the hostname and that the live packages are gone. It forces the BIOS
-layout so it cannot write NVRAM entries on the build host. Test UEFI boot and
-the GRUB menu in a VM.
+account, the hostname and that the live packages are gone. `--boot` also
+starts the installed root filesystem in QEMU with a serial console (non-LUKS
+only). It forces the BIOS layout so it cannot write NVRAM entries on the build
+host. Test UEFI boot and the GRUB menu in a VM.
