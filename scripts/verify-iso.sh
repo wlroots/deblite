@@ -88,18 +88,41 @@ else
     fail=1
 fi
 
+flavor=$(unsquashfs -cat "$TMP/filesystem.squashfs" etc/deblite-flavor 2>/dev/null | head -n1)
+case "$flavor" in
+    kde)
+        echo "flavor:   kde"
+        require usr/bin/plasmashell
+        require usr/bin/sddm
+        ;;
+    gnome|gnome-backports)
+        echo "flavor:   $flavor"
+        require usr/bin/gnome-shell
+        require usr/sbin/gdm3
+        ;;
+    xfce)
+        echo "flavor:   xfce"
+        require usr/bin/xfce4-session
+        require usr/sbin/lightdm
+        require_prefix usr/share/themes/Greybird
+        ;;
+    cinnamon)
+        echo "flavor:   cinnamon"
+        require usr/bin/cinnamon
+        require usr/sbin/lightdm
+        require usr/sbin/slick-greeter
+        require_prefix usr/share/themes/Mint-Y
+        require_prefix usr/share/icons/Mint-Y
+        ;;
+    *)
+        echo "FAIL: unexpected /etc/deblite-flavor: '${flavor:-<empty>}'" >&2
+        fail=1
+        ;;
+esac
+
 if [ "$fail" -ne 0 ]; then
     echo "verify-iso: FAILED" >&2
     exit 1
 fi
-
-flavor=$(unsquashfs -cat "$TMP/filesystem.squashfs" etc/deblite-flavor 2>/dev/null | head -n1)
-case "$flavor" in
-    kde|gnome|gnome-backports|xfce|cinnamon) echo "flavor:   $flavor" ;;
-    *)
-        echo "FAIL: unexpected /etc/deblite-flavor: '${flavor:-<empty>}'" >&2
-        exit 1
-        ;;
-esac
 
 echo "verify-iso: OK"

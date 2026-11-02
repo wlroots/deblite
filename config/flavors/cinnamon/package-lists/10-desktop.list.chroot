@@ -11,9 +11,11 @@ pavucontrol
 gnome-terminal
 file-roller
 
-# Mint theming. mint-y-icons is in Debian; mint-themes is vendored from the
-# upstream release by scripts/fetch-vendor-debs.sh.
+# Mint theming. mint-y-icons is in Debian; mint-themes and the mint-x-icons
+# dependency are vendored from upstream by scripts/fetch-vendor-debs.sh.
 mint-y-icons
+mint-themes
+mint-x-icons
 dconf-cli
 
 # Display manager and polkit
