@@ -35,7 +35,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
     exit 2
 fi
 
-WORK=$(mktemp -d /tmp/deblite-install-test.XXXXXX)
+WORK=$(mktemp -d "${DEBLITE_TEST_WORK:-/var/tmp}/deblite-install-test.XXXXXX")
 LOOP=""
 cleanup() {
     set +e
@@ -115,6 +115,12 @@ fi
 
 mkdir -p "$MOUNT_ROOT"
 mount "$ROOT_PART" "$MOUNT_ROOT"
+
+BOOT_DEV=$(lsblk -no PATH,PARTLABEL "$LOOP" | awk '$2 == "DEBLITE_BOOT" { print $1 }')
+if [ -n "$BOOT_DEV" ]; then
+    mkdir -p "$MOUNT_ROOT/boot"
+    mount "$BOOT_DEV" "$MOUNT_ROOT/boot"
+fi
 
 fail=0
 check() {
