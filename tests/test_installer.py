@@ -292,3 +292,49 @@ def test_gdm_autologin_edits_daemon_conf(tmp_path) -> None:
     assert "AutomaticLogin" not in text
     assert "TimedLogin" not in text
     assert "WaylandEnable=false" in text
+
+
+def test_gdm_autologin_creates_the_daemon_section(tmp_path) -> None:
+    from installer.core import system
+
+    conf = tmp_path / "etc/gdm3/daemon.conf"
+    conf.parent.mkdir(parents=True)
+    conf.write_text("# no daemon section yet\n[security]\nDisallowTCP=true\n")
+
+    cfg = InstallConfig()
+    cfg.mount_root = str(tmp_path)
+    cfg.flavor = "gnome"
+    cfg.user.username = "alice"
+    cfg.user.autologin = True
+    system._autologin(cfg, Executor(echo=False))
+
+    text = conf.read_text()
+    assert "[daemon]" in text
+    assert "AutomaticLogin=alice" in text
+    assert text.index("[daemon]") < text.index("AutomaticLogin=alice")
+    assert "[security]" in text
+
+
+def test_delive_removes_live_gdm_autologin(tmp_path) -> None:
+    from installer.core import delive
+
+    conf = tmp_path / "etc/gdm3/daemon.conf"
+    conf.parent.mkdir(parents=True)
+    conf.write_text(
+        "[daemon]\n"
+        "AutomaticLoginEnable=true\n"
+        "AutomaticLogin=user\n"
+        "TimedLoginEnable=true\n"
+        "TimedLogin=user\n"
+        "TimedLoginDelay=0\n"
+        "WaylandEnable=false\n"
+    )
+
+    cfg = InstallConfig()
+    cfg.mount_root = str(tmp_path)
+    delive._reset_gdm_autologin(cfg, Executor(echo=False))
+
+    text = conf.read_text()
+    for key in ("AutomaticLogin", "TimedLogin"):
+        assert key not in text
+    assert "WaylandEnable=false" in text
