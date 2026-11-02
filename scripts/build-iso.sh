@@ -113,9 +113,18 @@ BUILD=${BUILD:-$ROOT/build/$FLAVOR}
 mkdir -p "$OUT"
 
 if [ "$CLEAN" = "1" ]; then
+    # Keep live-build's package/bootstrap cache: a clean build should not
+    # re-download a gigabyte of unchanged .debs.
+    if [ -d "$BUILD/cache" ]; then
+        rm -rf "$BUILD.cache"
+        mv "$BUILD/cache" "$BUILD.cache"
+    fi
     rm -rf "$BUILD"
 fi
 mkdir -p "$BUILD"
+if [ -d "$BUILD.cache" ]; then
+    mv "$BUILD.cache" "$BUILD/cache"
+fi
 
 echo "==> configuring live-build for $FLAVOR ($COMPRESS)"
 cd "$BUILD"
