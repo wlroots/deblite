@@ -120,6 +120,13 @@ case "$flavor" in
         ;;
 esac
 
+# When the ISO follows our naming scheme, the baked edition must match it.
+expected=$(basename "$ISO" | sed -nE 's/^deblite-13-(.+)-amd64\.iso$/\1/p')
+if [ -n "$expected" ] && [ "$expected" != "$flavor" ]; then
+    echo "FAIL: ISO is named '$expected' but contains flavor '$flavor'" >&2
+    fail=1
+fi
+
 if [ "$fail" -ne 0 ]; then
     echo "verify-iso: FAILED" >&2
     exit 1
