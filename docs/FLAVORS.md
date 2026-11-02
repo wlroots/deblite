@@ -48,7 +48,7 @@ it. See `config/flavors/gnome-backports/README.md`.
   `xfce4-taskmanager`, `xfce4-systemload-plugin`
 - `network-manager-gnome` (nm-applet), `blueman`, `pavucontrol`
 - `greybird-gtk-theme`, `elementary-xfce-icon-theme`, `tango-icon-theme`
-- `lightdm` + `lightdm-gtk-greeter` + `mate-polkit`
+- `lightdm` + `lightdm-gtk-greeter` + `light-locker` + `mate-polkit`
 
 Greybird is applied system-wide through
 `/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/{xsettings,xfwm4}.xml`.
