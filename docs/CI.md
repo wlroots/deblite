@@ -43,8 +43,9 @@ Daily at 05:17 UTC:
    `https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/` for
    `debian-13.X.0-amd64-netinst.iso`.
 2. If the version differs from `debian-version.txt`, it commits the new
-   version and pushes a `v13.X` tag.
-3. The tag triggers `build.yml`, which publishes the release.
+   version, pushes a `v13.X` tag, and dispatches `build.yml` with
+   `release=true`. Pushes made with `GITHUB_TOKEN` do not start other
+   workflows, so the explicit `workflow_dispatch` is required.
 
 ## Release assets
 

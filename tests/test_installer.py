@@ -251,3 +251,16 @@ def test_non_admin_user_is_not_added_to_sudo(tmp_path) -> None:
 
     cfg.user.is_admin = False
     assert system._user_groups(cfg) == ["audio", "video"]
+
+
+def test_detect_flavor_reads_the_baked_file(tmp_path, monkeypatch) -> None:
+    from installer.core import config
+
+    flavor_file = tmp_path / "deblite-flavor"
+    flavor_file.write_text("kde\n")
+    monkeypatch.setattr(config, "FLAVOR_FILE", str(flavor_file))
+    assert config.detect_flavor() == "kde"
+    assert config.InstallConfig().flavor == "kde"
+
+    flavor_file.unlink()
+    assert config.detect_flavor("fallback") == "fallback"

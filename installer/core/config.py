@@ -10,6 +10,7 @@ import dataclasses
 import json
 import re
 from enum import Enum, StrEnum
+from pathlib import Path
 from typing import Any
 
 
@@ -27,6 +28,16 @@ class Firmware(StrEnum):
 FILESYSTEMS = ("ext4", "btrfs", "xfs")
 USERNAME_RE = re.compile(r"^[a-z_][a-z0-9_-]{0,31}$")
 HOSTNAME_RE = re.compile(r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$")
+FLAVOR_FILE = "/etc/deblite-flavor"
+
+
+def detect_flavor(default: str = "unknown") -> str:
+    """Read the edition baked into the live image, if present."""
+    try:
+        value = Path(FLAVOR_FILE).read_text().strip()
+    except OSError:
+        return default
+    return value or default
 
 
 @dataclasses.dataclass
@@ -83,6 +94,10 @@ class InstallConfig:
     # Escape hatches used by the test-suite and by rescue installs.
     skip_delive: bool = False
     keep_live_user: bool = False
+
+    def __post_init__(self) -> None:
+        if self.flavor in ("", "unknown"):
+            self.flavor = detect_flavor()
 
     def validate(self) -> list[str]:
         errors: list[str] = []

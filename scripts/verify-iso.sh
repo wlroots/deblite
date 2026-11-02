@@ -51,10 +51,17 @@ require usr/bin/apt
 require usr/bin/dpkg
 require etc/apt/apt.conf.d/99deblite
 require etc/os-release
+require etc/deblite-flavor
 require usr/lib/grub/i386-pc
 require usr/lib/grub/x86_64-efi
 require_prefix boot/vmlinuz-
 require_prefix boot/initrd.img-
+
+# Every edition ships the core applications.
+require usr/bin/nvim
+require usr/bin/gimp
+require usr/bin/onlyoffice-desktopeditors
+require usr/bin/firewall-cmd
 
 # The installer must never ship d-i or Calamares.
 forbid_prefix usr/sbin/calamares
@@ -84,4 +91,14 @@ if [ "$fail" -ne 0 ]; then
     echo "verify-iso: FAILED" >&2
     exit 1
 fi
+
+flavor=$(unsquashfs -cat "$TMP/filesystem.squashfs" etc/deblite-flavor 2>/dev/null | head -n1)
+case "$flavor" in
+    kde|gnome|gnome-backports|xfce|cinnamon) echo "flavor:   $flavor" ;;
+    *)
+        echo "FAIL: unexpected /etc/deblite-flavor: '${flavor:-<empty>}'" >&2
+        exit 1
+        ;;
+esac
+
 echo "verify-iso: OK"
