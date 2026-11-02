@@ -33,6 +33,18 @@ LIVE_PATHS = (
     "/var/lib/dbus/machine-id",
 )
 
+# GDM has no drop-in directory; its autologin keys live in daemon.conf.
+GDM_CONF = "/etc/gdm3/daemon.conf"
+GDM_AUTOLOGIN_KEYS = frozenset(
+    {
+        "AutomaticLoginEnable",
+        "AutomaticLogin",
+        "TimedLoginEnable",
+        "TimedLogin",
+        "TimedLoginDelay",
+    }
+)
+
 
 def purge_live(cfg: InstallConfig, ex: Executor) -> None:
     if cfg.skip_delive:
@@ -69,6 +81,7 @@ def purge_live(cfg: InstallConfig, ex: Executor) -> None:
     # Live boot config may be spread over a few drop-in directories.
     _remove_glob(cfg, ex, "/etc/systemd/system/*live*")
     _remove_glob(cfg, ex, "/lib/systemd/system/live-*")
+    _reset_gdm_autologin(cfg, ex)
 
     # Reset identity: a cloned machine must generate fresh IDs and host keys.
     _write(cfg, ex, "/etc/machine-id", "")
@@ -116,6 +129,19 @@ def _remove_glob(cfg: InstallConfig, ex: Executor, pattern: str) -> None:
     base = Path(_host_path(cfg, pattern))
     for match in base.parent.glob(base.name):
         ex.remove(str(match), recursive=True)
+
+
+def _reset_gdm_autologin(cfg: InstallConfig, ex: Executor) -> None:
+    """Drop the live autologin keys from GDM's single configuration file."""
+    path = Path(_host_path(cfg, GDM_CONF))
+    if not path.exists():
+        return
+    kept = [
+        line
+        for line in path.read_text().splitlines()
+        if line.split("=", 1)[0].strip() not in GDM_AUTOLOGIN_KEYS
+    ]
+    _write(cfg, ex, GDM_CONF, "\n".join(kept) + "\n")
 
 
 def _write(cfg: InstallConfig, ex: Executor, rel: str, content: str) -> None:

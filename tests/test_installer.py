@@ -264,3 +264,31 @@ def test_detect_flavor_reads_the_baked_file(tmp_path, monkeypatch) -> None:
 
     flavor_file.unlink()
     assert config.detect_flavor("fallback") == "fallback"
+
+
+def test_gdm_autologin_edits_daemon_conf(tmp_path) -> None:
+    from installer.core import system
+
+    conf = tmp_path / "etc/gdm3/daemon.conf"
+    conf.parent.mkdir(parents=True)
+    conf.write_text("[daemon]\nWaylandEnable=false\n\n[security]\nDisallowTCP=true\n")
+
+    cfg = InstallConfig()
+    cfg.mount_root = str(tmp_path)
+    cfg.flavor = "gnome"
+    cfg.user.username = "alice"
+    cfg.user.autologin = True
+    system._autologin(cfg, Executor(echo=False))
+
+    text = conf.read_text()
+    assert "AutomaticLogin=alice" in text
+    assert "TimedLogin=alice" in text
+    assert text.index("[daemon]") < text.index("AutomaticLogin=alice") < text.index("[security]")
+    assert "WaylandEnable=false" in text
+
+    cfg.user.autologin = False
+    system._autologin(cfg, Executor(echo=False))
+    text = conf.read_text()
+    assert "AutomaticLogin" not in text
+    assert "TimedLogin" not in text
+    assert "WaylandEnable=false" in text

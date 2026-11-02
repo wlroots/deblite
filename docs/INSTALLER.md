@@ -78,7 +78,8 @@ The copied rootfs contains the live stack. The installer:
 - purges `live-boot`, `live-boot-initramfs-tools`, `live-config`,
   `live-config-systemd`, `live-tools`, `user-setup` and `deblite-installer`;
 - removes `/etc/live`, `/lib/live`, `/usr/lib/live`, `/var/lib/live`;
-- removes live autologin drop-ins for SDDM, GDM and LightDM;
+- removes live autologin settings for SDDM, GDM (which has no drop-in
+  directory, so `/etc/gdm3/daemon.conf` is edited in place) and LightDM;
 - removes the live `user` account when the chosen username differs;
 - truncates `/etc/machine-id`, removes `/var/lib/dbus/machine-id` and
   `/etc/ssh/ssh_host_*`;

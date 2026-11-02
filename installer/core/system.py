@@ -149,39 +149,74 @@ def _passwd_id(cfg: InstallConfig, username: str, index: int) -> int:
 
 
 def _autologin(cfg: InstallConfig, ex: Executor) -> None:
-    paths = (
-        "/etc/sddm.conf.d/50-deblite.conf",
-        "/etc/gdm3/daemon.conf.d/50-deblite.conf",
-        "/etc/lightdm/lightdm.conf.d/50-deblite.conf",
-    )
+    sddm_conf = "/etc/sddm.conf.d/50-deblite.conf"
+    gdm_dropin = "/etc/gdm3/daemon.conf.d/50-deblite.conf"
+    lightdm_conf = "/etc/lightdm/lightdm.conf.d/50-deblite.conf"
+
     if not cfg.user.autologin:
-        for path in paths:
+        for path in (sddm_conf, gdm_dropin, lightdm_conf):
             ex.remove(_host_path(cfg, path))
+        _set_gdm_autologin(cfg, ex, enabled=False, user="")
         return
 
     user = cfg.user.username
     if cfg.flavor == "kde":
         ex.write_file(
-            _host_path(cfg, paths[0]),
+            _host_path(cfg, sddm_conf),
             f"[Autologin]\nUser={user}\nSession=plasmax11\nRelogin=false\n",
         )
     elif cfg.flavor in ("gnome", "gnome-backports"):
-        ex.write_file(
-            _host_path(cfg, paths[1]),
-            "[daemon]\n"
-            "AutomaticLoginEnable=true\n"
-            f"AutomaticLogin={user}\n"
-            "TimedLoginEnable=true\n"
-            f"TimedLogin={user}\n"
-            "TimedLoginDelay=0\n",
-        )
+        # GDM has no drop-in directory: edit daemon.conf itself.
+        _set_gdm_autologin(cfg, ex, enabled=True, user=user)
     else:
         ex.write_file(
-            _host_path(cfg, paths[2]),
+            _host_path(cfg, lightdm_conf),
             "[Seat:*]\n"
             f"autologin-user={user}\n"
             "autologin-user-timeout=0\n",
         )
+
+
+GDM_CONF = "/etc/gdm3/daemon.conf"
+GDM_AUTOLOGIN_KEYS = frozenset(
+    {
+        "AutomaticLoginEnable",
+        "AutomaticLogin",
+        "TimedLoginEnable",
+        "TimedLogin",
+        "TimedLoginDelay",
+    }
+)
+
+
+def _set_gdm_autologin(cfg: InstallConfig, ex: Executor, *, enabled: bool, user: str) -> None:
+    path = Path(_host_path(cfg, GDM_CONF))
+    if not path.exists():
+        return
+
+    lines = [
+        line
+        for line in path.read_text().splitlines()
+        if line.split("=", 1)[0].strip() not in GDM_AUTOLOGIN_KEYS
+    ]
+    if enabled:
+        keys = [
+            "AutomaticLoginEnable=true",
+            f"AutomaticLogin={user}",
+            "TimedLoginEnable=true",
+            f"TimedLogin={user}",
+            "TimedLoginDelay=0",
+        ]
+        index = next(
+            (i for i, line in enumerate(lines) if line.strip() == "[daemon]"),
+            None,
+        )
+        if index is None:
+            lines.extend(["", "[daemon]"])
+            index = len(lines) - 1
+        lines[index + 1 : index + 1] = keys
+
+    ex.write_file(str(path), "\n".join(lines) + "\n")
 
 
 def _apt_policy(cfg: InstallConfig, ex: Executor) -> None:

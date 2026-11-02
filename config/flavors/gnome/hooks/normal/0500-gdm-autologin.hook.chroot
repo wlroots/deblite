@@ -1,0 +1,22 @@
+#!/bin/sh
+# GDM only reads /etc/gdm3/daemon.conf; unlike SDDM and LightDM it has no
+# drop-in directory. Enable autologin for the live account directly in it.
+set -eu
+
+conf=/etc/gdm3/daemon.conf
+[ -f "$conf" ] || exit 0
+
+sed -i -E '/^(AutomaticLoginEnable|AutomaticLogin|TimedLoginEnable|TimedLogin|TimedLoginDelay)=/d' "$conf"
+if grep -q '^\[daemon\]' "$conf"; then
+    sed -i '/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=user\nTimedLoginEnable=true\nTimedLogin=user\nTimedLoginDelay=0' "$conf"
+else
+    cat >>"$conf" <<'EOF'
+
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=user
+TimedLoginEnable=true
+TimedLogin=user
+TimedLoginDelay=0
+EOF
+fi
