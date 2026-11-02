@@ -60,6 +60,7 @@ require_prefix boot/initrd.img-
 # Every edition ships the core applications.
 require usr/bin/nvim
 require usr/bin/gimp
+require usr/bin/helium
 require usr/bin/onlyoffice-desktopeditors
 require usr/bin/firewall-cmd
 
