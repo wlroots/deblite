@@ -89,8 +89,10 @@ normal install.
 
 ## Users and services
 
-- The user is created with `useradd -m`, added to `sudo` (plus `audio`,
-  `video`, `plugdev`, `netdev`, `bluetooth`, `lpadmin` when present).
+- The user is created with `useradd -m` and added to `audio`, `video`,
+  `plugdev`, `netdev`, `bluetooth` and `lpadmin` when present. Administrators
+  (`is_admin: true`) are also added to `sudo`; non-admins are explicitly
+  removed from it.
 - Root is locked unless `user.root_password` is set.
 - `NetworkManager`, `firewalld`, `bluetooth`, `fstrim.timer`,
   `systemd-timesyncd` and `zramswap` are enabled when present.
