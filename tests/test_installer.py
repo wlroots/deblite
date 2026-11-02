@@ -338,3 +338,16 @@ def test_delive_removes_live_gdm_autologin(tmp_path) -> None:
     for key in ("AutomaticLogin", "TimedLogin"):
         assert key not in text
     assert "WaylandEnable=false" in text
+
+
+def test_unmount_pseudo_drops_the_live_resolver(tmp_path) -> None:
+    from installer.core import disk
+
+    cfg = InstallConfig()
+    cfg.mount_root = str(tmp_path)
+    resolv = tmp_path / "etc/resolv.conf"
+    resolv.parent.mkdir()
+    resolv.write_text("nameserver 192.0.2.1\n")
+
+    disk.unmount_pseudo(cfg, Executor(echo=False))
+    assert not resolv.exists()
