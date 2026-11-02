@@ -59,8 +59,8 @@ Greybird is applied system-wide through
   `cinnamon-control-center`, `cinnamon-session`, `muffin`
 - `network-manager-gnome`, `blueman`, `pavucontrol`, `gnome-terminal`,
   `file-roller`
-- `mint-y-icons` (Debian) and `mint-themes` (vendored from the upstream
-  release because Debian does not package it)
+- `mint-y-icons` (Debian) and `mint-themes` plus its `mint-x-icons`
+  dependency (vendored from upstream, because Debian packages neither)
 - `lightdm` + `slick-greeter` + `mate-polkit`
 - Cinnamon integration: `xdg-desktop-portal-gtk`,
   `xdg-desktop-portal-xapp`, `libxapp-gtk3-module`, `metacity-common`,

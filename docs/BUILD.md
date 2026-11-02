@@ -105,10 +105,12 @@ can update normally.
 
 ## Vendored packages
 
-Debian ships `mint-y-icons` but not `mint-themes`. For the Cinnamon edition,
+Debian ships `mint-y-icons` but neither `mint-themes` nor its
+`mint-x-icons` dependency. For the Cinnamon edition,
 `scripts/fetch-vendor-debs.sh` downloads the pinned upstream
-`packages.tar.gz`, extracts `mint-themes_*_all.deb` and places it in
-`config/packages.chroot/`.
+`packages.tar.gz`, extracts `mint-themes_*_all.deb`, pulls
+`mint-x-icons_*_all.deb` from the Linux Mint package repository and places
+both in `config/packages.chroot/`.
 
 The DebLite installer itself is built by
 `scripts/build-installer-deb.sh` and also placed in `packages.chroot`.
