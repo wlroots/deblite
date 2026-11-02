@@ -17,12 +17,12 @@ whole pipeline can be walked safely on a normal workstation.
 | `luks` | Optional LUKS2 root; opens it as `/dev/mapper/cryptroot` |
 | `format_mount` | `mkfs.fat`, `mkfs.ext4|btrfs|xfs`, `mkswap`, mounts under `/mnt` |
 | `copy_rootfs` | `unsquashfs` the live squashfs into the target (rsync fallback) |
-| `mount_pseudo` | Bind-mounts `/dev`, `/dev/pts`, `/proc`, `/sys`, `/run`, efivars |
+| `mount_pseudo` | Bind-mounts `/dev`, `/dev/pts`, `/proc`, `/sys`, `/run`, efivars; copies the live resolver in for the chroot |
 | `delive` | Purges live packages, removes live user/autologin, resets machine-id and SSH host keys |
 | `fstab` | Writes `/etc/fstab`, `/etc/crypttab`, `cryptsetup-initramfs` config |
 | `system` | Hostname, locale, keymap, timezone, users, sudo, services, autologin, lean apt policy |
 | `bootloader` | Writes GRUB defaults, runs `grub-install`, `update-grub`, `update-initramfs` |
-| `unmount_pseudo` | Unmounts the bind mounts |
+| `unmount_pseudo` | Unmounts the bind mounts and drops the copied resolver |
 | `unmount` | Unmounts the target and closes LUKS |
 
 If a step raises, the pipeline makes a best-effort attempt to unmount and
