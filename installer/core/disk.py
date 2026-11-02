@@ -256,6 +256,10 @@ def unmount_pseudo(cfg: InstallConfig, ex: Executor) -> None:
     ):
         ex.run(["umount", "-l", f"{root}/{rel}"], check=False)
 
+    # mount_pseudo copied the live DNS config in for the chroot. Remove it so
+    # NetworkManager creates the installed system's resolver on first boot.
+    ex.remove(f"{root}/etc/resolv.conf")
+
 
 def verify_filesystem(device: str) -> str:
     return blkid_type(device)
