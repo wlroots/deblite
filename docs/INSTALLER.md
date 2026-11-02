@@ -56,6 +56,10 @@ The ESP is always mounted at `/boot/efi`. GRUB is installed for
 `x86_64-efi` (with a removable `EFI/BOOT/BOOTX64.EFI` fallback) or
 `i386-pc`, depending on the firmware.
 
+The installed GRUB is unsigned, so **UEFI Secure Boot must be disabled**. The
+live ISO has the same restriction. Wiring up Debian's `shim-signed` is a
+future improvement.
+
 ## Root filesystem
 
 `ext4` (default), `btrfs` and `xfs` are supported. Btrfs is created as a

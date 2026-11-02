@@ -134,6 +134,9 @@ See [`docs/CI.md`](docs/CI.md).
 - **GitHub release assets are capped at 2 GiB per file.** Release builds use
   xz and a size guard. If a future ISO exceeds the limit, the release job
   stops before uploading; splitting or external storage is then required.
+- **UEFI Secure Boot is not supported yet.** The live ISO and the installed
+  system use unsigned GRUB (`grubx64.efi`); boot with Secure Boot disabled.
+  Adding Debian's `shim-signed` is possible but not wired up.
 - **ONLYOFFICE still declares pre-t64 dependency names.** Trixie's `t64`
   packages provide those names, so apt resolves them. If the repository still
   fails, the build hook falls back to the official `.deb`.
