@@ -12,9 +12,13 @@ FLAVOR=""
 COMPRESS="zstd"
 RELEASE=0
 CLEAN=1
-DEBIAN_VERSION="trixie"
+DEBIAN_VERSION=""
 OUT="$ROOT/out"
 BUILD=""
+if [ -f "$ROOT/debian-version.txt" ]; then
+    DEBIAN_VERSION=$(tr -d '[:space:]' <"$ROOT/debian-version.txt")
+fi
+DEBIAN_VERSION=${DEBIAN_VERSION:-13.x}
 
 usage() {
     cat <<EOF
@@ -25,7 +29,7 @@ Flavors: kde, gnome, xfce, cinnamon, gnome-backports
 Options:
   --compress zstd|xz     squashfs compression (default: zstd)
   --release              release build: xz + 2 GiB GitHub guard
-  --debian-version VER   informational Debian point release (default: trixie)
+  --debian-version VER   informational Debian point release (default: debian-version.txt)
   --out DIR              output directory (default: ./out)
   --build DIR            build directory (default: ./build/FLAVOR)
   --no-clean             keep an existing build directory
@@ -208,6 +212,12 @@ cat >"$OUT/$NAME.manifest.json" <<EOF
   "iso_sha256": "$(cut -d' ' -f1 "$OUT/$NAME.sha256")"
 }
 EOF
+
+# The script re-executes itself with sudo, so hand the outputs back to the
+# invoking user when there is one.
+if [ -n "${SUDO_USER:-}" ]; then
+    chown "$SUDO_USER": "$DEST" "$OUT/$NAME.sha256" "$OUT/$NAME.manifest.json" 2>/dev/null || true
+fi
 
 echo
 echo "built: $DEST ($(numfmt --to=iec "$SIZE"))"
