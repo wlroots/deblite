@@ -104,6 +104,7 @@ case "$flavor" in
         echo "flavor:   xfce"
         require usr/bin/xfce4-session
         require usr/sbin/lightdm
+        require usr/bin/light-locker
         require_prefix usr/share/themes/Greybird
         ;;
     cinnamon)
