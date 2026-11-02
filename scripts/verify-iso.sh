@@ -23,7 +23,7 @@ if ! extract_squashfs "$ISO" "$TMP/filesystem.squashfs"; then
 fi
 echo "squashfs: $(squashfs_size "$TMP/filesystem.squashfs")"
 
-unsquashfs -l "$TMP/filesystem.squashfs" >"$TMP/list.txt"
+unsquashfs -l "$TMP/filesystem.squashfs" | sed 's#^squashfs-root/##' >"$TMP/list.txt"
 
 fail=0
 require() {

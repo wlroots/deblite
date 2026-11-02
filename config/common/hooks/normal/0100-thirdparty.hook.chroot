@@ -18,7 +18,9 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/helium.gpg] https://pkg.helium
     >/etc/apt/sources.list.d/helium.list
 
 # ONLYOFFICE. The repository still calls itself "squeeze"; that is intentional.
-curl -fsSL --retry 3 https://download.onlyoffice.com/repo/onlyoffice.key |
+# The key at /repo/onlyoffice.key is stale: the repository is signed by the
+# key published at /GPG-KEY-ONLYOFFICE.
+curl -fsSL --retry 3 https://download.onlyoffice.com/GPG-KEY-ONLYOFFICE |
     gpg --dearmor --yes -o /etc/apt/keyrings/onlyoffice.gpg
 echo "deb [signed-by=/etc/apt/keyrings/onlyoffice.gpg] https://download.onlyoffice.com/repo/debian squeeze main" \
     >/etc/apt/sources.list.d/onlyoffice.list

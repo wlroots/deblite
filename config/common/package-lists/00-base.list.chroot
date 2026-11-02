@@ -38,6 +38,7 @@ btrfs-progs
 mtools
 rsync
 squashfs-tools
+zstd
 grub2-common
 grub-efi-amd64-bin
 grub-pc-bin
