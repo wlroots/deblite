@@ -29,7 +29,9 @@ Included: `gnome-shell`, `gnome-session`, `gnome-settings-daemon`,
 `gnome-tweaks`, `gvfs`, `gdm3`, `gnome-bluetooth-sendto`,
 `network-manager-gnome`, `xdg-desktop-portal-gnome`, `power-profiles-daemon`.
 
-Autologin: `/etc/gdm3/daemon.conf.d/50-deblite-autologin.conf`.
+Autologin: GDM has no drop-in directory, so the live hook edits
+`/etc/gdm3/daemon.conf` directly (and the installer does the same for an
+installed system).
 
 ## GNOME backports (`gnome-backports`, deferred)
 
@@ -71,9 +73,10 @@ database is compiled by `config/flavors/cinnamon/hooks/normal/0500-dconf.hook.ch
 ## Autologin and first boot
 
 The live session autologs in as `user`. The installer removes the live
-autologin drop-ins and, if the operator asked for autologin, writes a fresh
-one for the real account. Otherwise the installed system shows the display
-manager's login screen.
+autologin settings and, if the operator asked for autologin, writes a fresh
+one for the real account (SDDM and LightDM drop-ins; GDM's `daemon.conf`
+directly). Otherwise the installed system shows the display manager's login
+screen.
 
 ## Adding an edition
 

@@ -34,7 +34,9 @@ out/deblite-13-kde-amd64.iso.manifest.json
 
 Build directories are kept under `build/<flavor>/`. They contain
 `build.log`, the generated live-build config and the chroot; `--no-clean`
-reuses an existing directory for debugging.
+reuses an existing directory for debugging. A clean build keeps live-build's
+`cache/` directory (packages, bootstrap), so rebuilding an edition after a
+config change does not re-download everything.
 
 ## All editions
 
@@ -142,8 +144,10 @@ sudo apt-get install qemu-system-x86
 ./scripts/qemu-smoke.sh out/deblite-13-kde-amd64.iso
 ```
 
-This only checks that the ISO reaches a Linux/systemd boot banner. For a real
-install test, run the installer against a loop-backed disk image:
+This extracts `/live/vmlinuz` and `/live/initrd.img`, boots them with QEMU's
+serial console and waits for live-boot/systemd markers. It validates the live
+rootfs, not the ISO's bootloader; test isolinux/GRUB and UEFI in a VM. For a
+real install test, run the installer against a loop-backed disk image:
 
 ```sh
 sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso
