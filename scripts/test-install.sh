@@ -58,6 +58,10 @@ echo "==> extracting filesystem.squashfs"
 xorriso -osirrox on -indev "$ISO" -extract /live/filesystem.squashfs "$SQUASHFS" >/dev/null 2>&1
 chmod +w "$SQUASHFS"
 
+FLAVOR=$(unsquashfs -cat "$SQUASHFS" etc/deblite-flavor 2>/dev/null | head -n1)
+FLAVOR=${FLAVOR:-unknown}
+echo "==> edition baked into the ISO: $FLAVOR"
+
 echo "==> creating a 12 GiB sparse disk image"
 truncate -s 12G "$DISK"
 LOOP=$(losetup --find --show --partscan "$DISK")
@@ -70,7 +74,7 @@ fi
 CONFIG=$(mktemp)
 cat >"$CONFIG" <<EOF
 {
-  "flavor": "xfce",
+  "flavor": "$FLAVOR",
   "disk": {
     "device": "$LOOP",
     "mode": "erase_disk",
