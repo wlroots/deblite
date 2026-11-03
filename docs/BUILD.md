@@ -73,7 +73,7 @@ Both are passed to live-build as `--chroot-squashfs-compression-type`.
 --apt-indices false
 --debootstrap-options "--variant=minbase"
 --bootloaders "syslinux grub-efi"
---uefi-secure-boot auto
+--uefi-secure-boot disable
 --debian-installer none
 --memtest none
 --firmware-chroot false
@@ -82,6 +82,24 @@ Both are passed to live-build as `--chroot-squashfs-compression-type`.
 
 `--debian-installer none` guarantees that d-i is not on the medium. Calamares
 is never added. The installer is the only install path.
+
+`--uefi-secure-boot disable` keeps shim and Debian's signed GRUB out of the
+image: DebLite ships unsigned GRUB and does not support Secure Boot. With
+`auto`, live-build also installs `shim-signed` and `grub-efi-amd64-signed`.
+That weight is not the only issue. With Secure Boot active, shim makes GRUB
+take its legacy x86 kernel loader instead of the EFI-stub/LoadFile2 handoff the
+image uses without it, so the shipped kernel path silently depends on whether a
+machine has Secure Boot enabled. `scripts/verify-iso.sh` fails the build if
+shim or a signed GRUB reappears in the image.
+
+`config/common/hooks/normal/0500-uefi-compat.hook.binary` adds a second GRUB
+entry on UEFI media, "Live system (amd64, UEFI compatibility mode)". It boots a
+copy of the live kernel with the PE image version cleared. GRUB then takes its
+classic x86 loader, which places the initramfs in memory and hands it to the
+kernel through `boot_params` instead of registering `EFI_LOAD_FILE2_PROTOCOL`
+for the kernel's EFI stub. Firmware that loses the EFI-stub handoff boots
+without an initramfs and panics; the extra entry is the fallback for those
+machines. It costs one kernel copy on the ISO and is not shown on BIOS boots.
 
 `--firmware-chroot false` disables live-build's own firmware metapackage set.
 DebLite curates firmware explicitly in

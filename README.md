@@ -320,6 +320,16 @@ Boot (sometimes called "UEFI Secure Boot", "Platform Key", "Windows UEFI
 mode" or "OS Mode: Windows 8 or 10"), then boot the USB again. If the USB entry is missing, try the
 legacy/BIOS entry or rewrite the stick in DD mode.
 
+**UEFI boot panics with "VFS: Unable to mount root fs on unknown-block(0,0)"**
+
+The kernel did not get the initramfs, so it has no live root filesystem to
+mount. On UEFI, GRUB hands the initramfs over through the firmware's EFI
+services, and some older firmware loses it. Boot the stick again and pick
+"Live system (amd64, UEFI compatibility mode)" in the GRUB menu: that entry
+uses the same kernel with GRUB's classic loader, which places the initramfs in
+memory itself. The entry only appears on UEFI boots. Booting the legacy/BIOS
+entry works too, but then the installer can only install in BIOS mode.
+
 **The graphical installer does not start**
 
 Open a terminal in the live session and run `sudo deblite-installer --gui`.

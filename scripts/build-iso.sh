@@ -126,6 +126,13 @@ if [ -d "$BUILD.cache" ]; then
     mv "$BUILD.cache" "$BUILD/cache"
 fi
 
+# The ISOs ship unsigned GRUB: DebLite does not support Secure Boot. With
+# --uefi-secure-boot auto live-build also installs shim-signed and
+# grub-efi-amd64-signed, which is bloat and contradicts the unsigned-GRUB
+# invariant. Shim also changes the kernel handoff: with Secure Boot active GRUB
+# switches to its legacy x86 kernel loader instead of the EFI-stub/LoadFile2
+# path DebLite ships by default. That difference matters for firmware quirks
+# around initrd delivery, so the boot path must not depend on shim.
 echo "==> configuring live-build for $FLAVOR ($COMPRESS)"
 cd "$BUILD"
 lb config \
@@ -138,7 +145,7 @@ lb config \
     --apt-indices false \
     --debootstrap-options "--variant=minbase" \
     --bootloaders "syslinux grub-efi" \
-    --uefi-secure-boot auto \
+    --uefi-secure-boot disable \
     --debian-installer none \
     --memtest none \
     --firmware-chroot false \

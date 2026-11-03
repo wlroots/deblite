@@ -125,12 +125,44 @@ forbid_prefix etc/calamares
 forbid_prefix usr/sbin/debian-installer
 forbid_prefix install/
 
+# The ISOs ship unsigned GRUB and do not support Secure Boot. Shim and the
+# Debian-signed GRUB are forbidden: they are extra packages, and with Secure
+# Boot active shim forces GRUB onto its legacy x86 loader instead of the
+# EFI-stub path the ISO uses otherwise.
+forbid_prefix usr/lib/shim/
+forbid_prefix usr/lib/grub/x86_64-efi-signed/
+forbid_prefix usr/lib/grub/i386-efi-signed/
+for pkg in shim-signed grub-efi-amd64-signed grub-efi-ia32-signed; do
+    if installed_package "$pkg"; then
+        echo "FAIL: forbidden package installed: $pkg" >&2
+        fail=1
+    fi
+done
+
 # Live medium must provide the installer and the live stack.
 if ! xorriso -indev "$ISO" -find / -name isolinux.bin -exec echo 2>/dev/null | grep -q isolinux.bin; then
     echo "WARN: isolinux.bin not found (BIOS boot may be unavailable)" >&2
 fi
-if ! xorriso -indev "$ISO" -find / -name grubx64.efi -exec echo 2>/dev/null | grep -q grubx64.efi; then
-    echo "WARN: no grubx64.efi on the ISO (UEFI boot may be unavailable)" >&2
+if ! xorriso -indev "$ISO" -find /EFI -name bootx64.efi -exec echo 2>/dev/null | grep -q bootx64.efi; then
+    echo "WARN: no EFI/boot/bootx64.efi on the ISO (UEFI boot may be unavailable)" >&2
+fi
+
+# The EFI boot image must contain plain GRUB, never shim. Shim is recognisable
+# by its MOK state machine, which is absent from GRUB (GRUB knows the variable
+# name but not these routines).
+efi_img="$TMP/efi.img"
+if xorriso -indev "$ISO" -osirrox on -extract /boot/grub/efi.img "$efi_img" \
+    2>/dev/null && [ -s "$efi_img" ]; then
+    if grep -aq -e install_shim_protocols -e import_mok_state "$efi_img"; then
+        echo "FAIL: EFI boot image contains shim; unsigned GRUB is required" >&2
+        fail=1
+    fi
+    if ! grep -aq 'GNU GRUB' "$efi_img"; then
+        echo "FAIL: EFI boot image does not contain GRUB" >&2
+        fail=1
+    fi
+else
+    echo "WARN: cannot extract /boot/grub/efi.img" >&2
 fi
 
 # Confirm the lean-apt policy made it into the image.
