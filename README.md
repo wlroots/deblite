@@ -34,6 +34,7 @@ DebLite is not affiliated with or endorsed by the Debian Project.
 - [Recovery](#recovery)
 - [Getting help](#getting-help)
 - [Building from source](#building-from-source)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Editions
@@ -49,7 +50,7 @@ applications. Pick the desktop you like; the underlying system is identical.
 | **Cinnamon** | Cinnamon 6.4 | LightDM + Slick Greeter | Mint-Y | `deblite-13-cinnamon-amd64.iso` | A familiar, traditional desktop layout |
 
 A `gnome-backports` edition is scaffolded in the source tree but is not built:
-official `trixie-backports` does not provide the GNOME 49 shell, mutter or
+official `trixie-backports` does not provide the modern GNOME shell, mutter or
 control center. Use the regular GNOME 48 edition.
 
 ## Requirements
@@ -139,6 +140,11 @@ Use the whole-disk device (`/dev/sdb`), not a partition (`/dev/sdb1`).
 
 **macOS**
 
+> [!NOTE]
+> DebLite doesn't support ARM64 (Apple Silicon based) devices.
+>
+> It supports only legacy Intel-based devices, if you want Linux on your MacBook, use [Asahi Linux](https://asahilinux.org/), sorry for inconvinience
+
 ```sh
 diskutil list                 # find the USB disk, e.g. /dev/disk4
 diskutil unmountDisk /dev/disk4
@@ -147,9 +153,15 @@ sudo dd if=deblite-13-kde-amd64.iso of=/dev/rdisk4 bs=4m
 
 **Windows**
 
-Use [Rufus](https://rufus.ie/) or [balenaEtcher](https://etcher.balena.io/).
+Use [Rufus](https://rufus.ie/)
 In Rufus, select the ISO, choose **GPT** for UEFI systems, and write in **DD
-mode** if prompted. Etcher writes in DD mode automatically.
+mode** if prompted.
+
+**System-independent (recommended)**
+
+Use [balenaEtcher](https://etcher.balena.io/). Its available for Linux, Windows, macOS
+
+You can also use [Ventoy](https://ventoy.net/). It supports Linux, Windows and can be installed from LiveUSB and you can write files on a flash drive, or have multiple ISOs
 
 ## Boot the live system
 
@@ -303,8 +315,8 @@ want them; DebLite will not pull them in for you.
 **The USB stick will not boot / "Verification failed" / Secure Boot error**
 
 Secure Boot is not supported. Enter the firmware settings and disable Secure
-Boot (sometimes called "UEFI Secure Boot", "Platform Key" or "Windows UEFI
-mode"), then boot the USB again. If the USB entry is missing, try the
+Boot (sometimes called "UEFI Secure Boot", "Platform Key", "Windows UEFI
+mode" or "OS Mode: Windows 8 or 10"), then boot the USB again. If the USB entry is missing, try the
 legacy/BIOS entry or rewrite the stick in DD mode.
 
 **The graphical installer does not start**
@@ -418,6 +430,29 @@ they never compile the installer from source.
 
 See [`docs/BUILD.md`](docs/BUILD.md) for the full build and installer-pinning
 guide, and [`docs/CI.md`](docs/CI.md) for the CI/CD workflows.
+
+## Contributing
+
+Contributions are welcome, including those made with AI assistance. Using AI
+is **not prohibited**. What matters is the result: the code and docs must be
+clean, minimal, tested, and consistent with the project's conventions.
+
+If you use an AI tool, you are still responsible for the change. Review every
+line, run the relevant checks, and do not submit generated code you cannot
+explain. Report what you actually built and tested. Fabricated test results,
+invented links and unverified claims are not acceptable.
+
+Before opening a pull request:
+
+```sh
+make check
+sudo ./scripts/build-iso.sh <edition>
+./scripts/verify-iso.sh out/deblite-13-<edition>-amd64.iso
+./scripts/audit-bloat.sh out/deblite-13-<edition>-amd64.iso
+```
+
+See [`AGENTS.md`](AGENTS.md) for the full contributor and agent guidelines,
+including the project invariants and testing matrix.
 
 ## License
 
