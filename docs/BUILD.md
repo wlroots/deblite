@@ -85,9 +85,45 @@ is never added. The installer is the only install path.
 
 `--firmware-chroot false` disables live-build's own firmware metapackage set.
 DebLite curates firmware explicitly in
-`config/common/package-lists/00-base.list.chroot`, which avoids pulling
+`config/common/package-lists/05-firmware.list.chroot`, which avoids pulling
 `firmware-nvidia-tesla-*`, `dahdi-firmware-nonfree`, `atmel-firmware` and
 similar packages that are not needed on a desktop.
+
+## Firmware
+
+`config/common/package-lists/05-firmware.list.chroot` lists the firmware for
+hardware found in laptops, desktops and workstations: AMD, Intel and NVIDIA
+graphics, Wi-Fi, Bluetooth, audio DSPs, card readers and capture cards.
+`scripts/verify-iso.sh` parses the list and fails unless every package is
+installed in the image.
+
+The list deliberately excludes:
+
+- `firmware-linux` and `firmware-linux-nonfree`, metapackages that duplicate
+  entries already selected explicitly. Keeping the list explicit lets
+  `verify-iso.sh` assert each package and keeps the exclusions documented.
+  The full set of `firmware-*` packages is about 1.2 GiB installed; this
+  curated list is about 620 MiB.
+- `firmware-b43-installer` and `firmware-b43legacy-installer`, which download
+  proprietary blobs during `postinst` and break reproducible offline builds.
+- Server and enterprise network firmware (`firmware-bnx2*`, `firmware-cavium`,
+  `firmware-marvell-prestera`, `firmware-myricom`, `firmware-netronome`,
+  `firmware-netxen`, `firmware-qlogic`).
+- Server BMC, ARM SoC and data-centre GPU firmware (`firmware-ast`,
+  `firmware-samsung`, `firmware-qcom-soc`, `firmware-nvidia-tesla-535-gsp`).
+
+Microcode (`intel-microcode`, `amd64-microcode`), `wireless-regdb` and
+`bluez-firmware` stay in `00-base.list.chroot` because they are part of the
+base system rather than device firmware.
+
+## Virtual machine guest integration
+
+Every edition ships `qemu-guest-agent` and `open-vm-tools`. The live root
+filesystem is copied to the target, so the installed system keeps them.
+`0400-guest-tools.hook.chroot` enables `open-vm-tools.service`;
+`qemu-guest-agent` is started by its udev rule when the virtio-serial port is
+present. `verify-iso.sh` checks for `/usr/sbin/qemu-ga`, `/usr/bin/vmtoolsd`
+and the enabled VMware unit.
 
 ## Third-party repositories
 
@@ -111,6 +147,31 @@ Debian ships `mint-y-icons` but neither `mint-themes` nor its
 `packages.tar.gz`, extracts `mint-themes_*_all.deb`, pulls
 `mint-x-icons_*_all.deb` from the Linux Mint package repository and places
 both in `config/packages.chroot/`.
+
+## Artwork
+
+Custom wallpapers are not stored in this repository. Drop images into
+`../deblite-artwork/wallpapers` (a sibling of this checkout) before building,
+or point `DEBLITE_ARTWORK_DIR` at another directory. `scripts/install-artwork.sh`
+copies the supported images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`) into
+`/usr/share/backgrounds/deblite/` and selects one as the default in every
+edition:
+
+- **KDE Plasma** — `/usr/libexec/deblite-wallpaper` runs
+  `plasma-apply-wallpaperimage` on the first login and then leaves the user's
+  choice alone. The hook also points the SDDM Breeze theme at the wallpaper.
+- **GNOME** — a system dconf drop-in sets `picture-uri` and
+  `picture-uri-dark`; the login screen is unchanged.
+- **XFCE** — a system `xfce4-desktop` xfconf default covers four monitors,
+  a first-login helper rewrites the monitor properties xfdesktop actually
+  creates, and the LightDM GTK greeter background is updated.
+- **Cinnamon** — a system dconf drop-in sets the desktop background and the
+  Slick Greeter background.
+
+`DEBLITE_WALLPAPER` selects the default by file name; without it the first
+image in sort order wins. Both variables must survive `sudo`, so use
+`sudo -E` or pass them inline. The script is a no-op when the directory or
+the images are missing, and every edition then keeps its built-in wallpaper.
 
 ## Installer package
 
@@ -152,10 +213,11 @@ Every build runs:
 
 `verify-iso.sh` checks the squashfs for the kernel, initrd, apt, GRUB modules,
 the installer, the baked edition (`/etc/deblite-flavor`), the core applications
-(Neovim, GIMP, ONLYOFFICE, firewalld) and the lean apt policy, and confirms
-that d-i/Calamares are absent. `audit-bloat.sh` parses `var/lib/dpkg/status`
-and fails on the denylist (LibreOffice, Thunderbird, GNOME extras, games,
-heavy meta-packages).
+(Neovim, GIMP, ONLYOFFICE, firewalld), every firmware package in
+`05-firmware.list.chroot`, the VM guest agents, and the lean apt policy. It also
+confirms that d-i/Calamares are absent. `audit-bloat.sh` parses
+`var/lib/dpkg/status` and fails on the denylist (LibreOffice, Thunderbird, GNOME
+extras, games, heavy meta-packages).
 
 Set `DEBLITE_ALLOW_BLOAT=1` to turn the audit into warnings while debugging.
 

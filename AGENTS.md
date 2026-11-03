@@ -51,8 +51,13 @@ These are product requirements, not preferences:
 - **Four editions only:** `kde`, `gnome`, `xfce`, `cinnamon`. The
   `gnome-backports` flavor is scaffolded and dirty-gated; do not add it to the
   CI matrix or publish it.
-- **Every edition ships** Neovim, GIMP, Helium, ONLYOFFICE Desktop Editors and
-  `firewalld`. `scripts/verify-iso.sh` enforces this.
+- **Every edition ships** Neovim, GIMP, Helium, ONLYOFFICE Desktop Editors,
+  `firewalld`, `qemu-guest-agent` and `open-vm-tools`.
+  `scripts/verify-iso.sh` enforces this.
+- **Firmware is curated.** Desktop firmware lives in
+  `config/common/package-lists/05-firmware.list.chroot`; the verifier asserts
+  every listed package is installed. Do not add `firmware-linux` metapackages,
+  server/ARM firmware or firmware installers that download blobs at postinst.
 - **No Debian installer and no Calamares.** The live-build invocation uses
   `--debian-installer none`, and the verifier rejects their files.
 - **The installer is external.** Never copy `installer/` sources back into this
@@ -81,6 +86,7 @@ These are product requirements, not preferences:
 | `config/common/` | Shared package lists, hooks, includes and live-build preseed |
 | `config/flavors/<name>/` | Per-edition packages, theming and autologin |
 | `scripts/build-iso.sh` | Main ISO build; re-executes itself with `sudo` |
+| `scripts/install-artwork.sh` | Copies optional wallpapers into the build |
 | `scripts/fetch-installer-deb.sh` | Downloads and verifies the pinned installer |
 | `scripts/fetch-vendor-debs.sh` | Vendors Mint theme packages for Cinnamon |
 | `scripts/verify-iso.sh` | Static checks for required/forbidden ISO contents |

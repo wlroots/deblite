@@ -288,8 +288,9 @@ update from their own official repositories, which are already configured.
 
 | Category | Software |
 |---|---|
-| Kernel and hardware | Linux 6.12, firmware, Intel/AMD microcode |
+| Kernel and hardware | Linux 6.12, desktop firmware, Intel/AMD microcode |
 | Desktop core | NetworkManager, PipeWire/WirePlumber, Bluetooth, zram, timesync |
+| Virtual machines | QEMU guest agent, `open-vm-tools` |
 | Security | `firewalld`, LUKS2, `sudo`, GRUB (BIOS + UEFI) |
 | Applications | **Neovim**, **GIMP**, **ONLYOFFICE Desktop Editors**, **Helium** |
 | Utilities | `htop`, `less`, `curl`, `wget`, `gnupg`, standard CLI tools, Noto fonts |
@@ -422,6 +423,13 @@ sudo make all                 # all four release ISOs, xz
 
 Output lands in `out/` as the ISO, its `.sha256` and a `.manifest.json`.
 Release builds enforce GitHub's 2 GiB per-asset limit.
+
+Every edition can use custom wallpapers. Put images in
+`../deblite-artwork/wallpapers` (or set `DEBLITE_ARTWORK_DIR`), optionally
+pick one with `DEBLITE_WALLPAPER`, and build with `sudo -E`. KDE, GNOME,
+XFCE and Cinnamon each receive a system-wide default; without artwork they
+keep their built-in wallpaper. See
+[`docs/BUILD.md`](docs/BUILD.md#artwork).
 
 The installer is a separate project,
 [`deblite-installer`](https://github.com/wlroots/deblite-installer). ISO builds

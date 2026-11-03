@@ -160,6 +160,12 @@ cp -a "$ROOT/config/common/." "$BUILD/config/"
 cp -a "$ROOT/config/flavors/$FLAVOR/." "$BUILD/config/"
 mkdir -p "$BUILD/config/includes.chroot/etc"
 printf '%s\n' "$FLAVOR" >"$BUILD/config/includes.chroot/etc/deblite-flavor"
+
+echo "==> installing optional artwork"
+"$ROOT/scripts/install-artwork.sh" \
+    --flavor "$FLAVOR" \
+    --config "$BUILD/config"
+
 mkdir -p "$BUILD/config/packages.chroot"
 
 echo "==> fetching deblite-installer.deb"

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Enable the guest integration services that the installer copies into the
+# target system.
+#
+# qemu-guest-agent has no [Install] section: its udev rule starts the unit
+# whenever the virtio-serial guest-agent port is present, so there is nothing
+# to enable. open-vm-tools is a plain multi-user service and must be enabled
+# explicitly.
+set -eu
+
+unit=/usr/lib/systemd/system/open-vm-tools.service
+if [ ! -f "$unit" ]; then
+    echo "[deblite] missing $unit" >&2
+    exit 1
+fi
+
+# Create the enablement symlink directly. systemctl enable also tries to
+# synchronise the SysV init script, which shells out to chroot and is
+# unreliable inside a live-build chroot.
+install -d -m 0755 /etc/systemd/system/multi-user.target.wants
+ln -sfn "$unit" /etc/systemd/system/multi-user.target.wants/open-vm-tools.service

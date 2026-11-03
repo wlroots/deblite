@@ -2,24 +2,8 @@
 # Deliberately no recommends/suggests: live-build is configured with
 # --apt-recommends false and --no-install-recommends --no-install-suggests.
 
-# Kernel, firmware and microcode
+# Kernel and microcode. Hardware firmware lives in 05-firmware.list.chroot.
 linux-image-amd64
-firmware-linux-free
-firmware-misc-nonfree
-firmware-iwlwifi
-firmware-amd-graphics
-firmware-intel-graphics
-firmware-intel-sound
-firmware-atheros
-firmware-brcm80211
-firmware-realtek
-firmware-mediatek
-firmware-libertas
-firmware-ipw2x00
-firmware-zd1211
-firmware-nvidia-graphics
-firmware-sof-signed
-firmware-ath9k-htc
 wireless-regdb
 bluez-firmware
 intel-microcode
@@ -59,6 +43,9 @@ systemd
 systemd-sysv
 dbus
 sudo
+# Virtual machine guests: QEMU/KVM and VMware.
+qemu-guest-agent
+open-vm-tools
 locales
 console-setup
 keyboard-configuration

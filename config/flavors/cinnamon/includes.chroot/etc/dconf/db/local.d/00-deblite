@@ -11,3 +11,13 @@ cursor-theme='Adwaita'
 
 [org/cinnamon/theme]
 name='Mint-Y'
+
+# Fallback wallpaper shipped by gnome-backgrounds, which cinnamon depends on.
+# scripts/install-artwork.sh overrides this when artwork is available.
+[org/cinnamon/desktop/background]
+picture-uri='file:///usr/share/backgrounds/gnome/adwaita-l.jpg'
+picture-options='zoom'
+
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/gnome/adwaita-l.jpg'
+picture-options='zoom'

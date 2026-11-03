@@ -1,0 +1,22 @@
+#!/bin/sh
+# Apply artwork that cannot be installed through includes.chroot and compile
+# the system dconf database used by GNOME and Cinnamon.
+set -eu
+
+if command -v dconf >/dev/null 2>&1; then
+    dconf update
+fi
+
+wallpaper=/etc/deblite-wallpaper
+if [ -f "$wallpaper" ]; then
+    target=$(cat "$wallpaper")
+
+    # Breeze reads its options from theme.conf only, so patch the packaged
+    # file instead of trying to override it from /etc/sddm.conf.d.
+    theme=/usr/share/sddm/themes/breeze/theme.conf
+    if [ -n "$target" ] && [ -f "$theme" ]; then
+        sed -i "s|^background=.*|background=$target|" "$theme"
+    fi
+
+    rm -f "$wallpaper"
+fi

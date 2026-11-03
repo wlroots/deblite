@@ -1,7 +1,0 @@
-#!/bin/sh
-# Compile the system dconf database used for Mint-Y defaults.
-set -eu
-
-if command -v dconf >/dev/null 2>&1; then
-    dconf update
-fi
