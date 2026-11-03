@@ -5,7 +5,7 @@ set -eu
 cat >/etc/deblite-release <<'EOF'
 DebLite 13 (trixie)
 A lean Debian 13 desktop distribution.
-https://github.com/deblite/deblite
+https://github.com/wlroots/deblite
 EOF
 
 cat >/usr/lib/os-release <<'EOF'
@@ -16,9 +16,9 @@ VERSION="13 (trixie)"
 VERSION_CODENAME=trixie
 ID=deblite
 ID_LIKE=debian
-HOME_URL="https://github.com/deblite/deblite"
-SUPPORT_URL="https://github.com/deblite/deblite/issues"
-BUG_REPORT_URL="https://github.com/deblite/deblite/issues"
+HOME_URL="https://github.com/wlroots/deblite"
+SUPPORT_URL="https://github.com/wlroots/deblite/issues"
+BUG_REPORT_URL="https://github.com/wlroots/deblite/issues"
 EOF
 ln -sfn ../usr/lib/os-release /etc/os-release
 

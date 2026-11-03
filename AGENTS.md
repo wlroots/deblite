@@ -12,7 +12,7 @@ live in [`docs/BUILD.md`](docs/BUILD.md) and [`docs/CI.md`](docs/CI.md).
 DebLite builds four lean Debian 13 (Trixie) live ISOs with `live-build`:
 KDE Plasma, GNOME, XFCE and Cinnamon. Each ISO boots into a live session and
 ships a custom installer. The installer source lives in the separate
-[`deblite-installer`](https://github.com/deblite/deblite-installer)
+[`deblite-installer`](https://github.com/wlroots/deblite-installer)
 repository; this repository downloads a pinned `.deb` release and installs it
 into the live root filesystem.
 
@@ -203,7 +203,7 @@ small functions and `pytest` coverage.
 
 The installer is a separate repository. Do not patch it from here.
 
-- Source: <https://github.com/deblite/deblite-installer>
+- Source: <https://github.com/wlroots/deblite-installer>
 - Local sibling checkout for development: `../deblite-installer`
 - Tests there: `make test`, `make lint`, `make deb` (Ruff, pytest, shellcheck)
 - Release tags: `installer-vX.Y.Z`, matching `installer/__init__.py` and

@@ -80,7 +80,7 @@ control center. Use the regular GNOME 48 edition.
 ## Download
 
 Download the edition you want from the
-[latest DebLite release](https://github.com/deblite/deblite/releases/latest).
+[latest DebLite release](https://github.com/wlroots/deblite/releases/latest).
 Release tags follow Debian point releases, for example `v13.7`.
 
 Each release provides, per edition:
@@ -385,13 +385,13 @@ again. If you need to repair the existing system:
    ```
 
 Use `--target=i386-pc` on BIOS systems. See the
-[installer documentation](https://github.com/deblite/deblite-installer/blob/main/docs/INSTALLER.md)
+[installer documentation](https://github.com/wlroots/deblite-installer/blob/main/docs/INSTALLER.md)
 for the full partition layout, LUKS details and de-live cleanup.
 
 ## Getting help
 
-- **Issues:** <https://github.com/deblite/deblite/issues>
-- **Installer project:** <https://github.com/deblite/deblite-installer>
+- **Issues:** <https://github.com/wlroots/deblite/issues>
+- **Installer project:** <https://github.com/wlroots/deblite-installer>
 
 When reporting a problem, include:
 
@@ -424,7 +424,7 @@ Output lands in `out/` as the ISO, its `.sha256` and a `.manifest.json`.
 Release builds enforce GitHub's 2 GiB per-asset limit.
 
 The installer is a separate project,
-[`deblite-installer`](https://github.com/deblite/deblite-installer). ISO builds
+[`deblite-installer`](https://github.com/wlroots/deblite-installer). ISO builds
 consume a pinned installer `.deb` release listed in `installer-release.env`;
 they never compile the installer from source.
 

@@ -81,7 +81,7 @@ if [ -z "$REPO" ]; then
     else
         # Fallback used before the repository has a remote. Override it with
         # DEBLITE_INSTALLER_REPO or --repo.
-        REPO="deblite/deblite-installer"
+        REPO="wlroots/deblite-installer"
     fi
 fi
 
