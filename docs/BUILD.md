@@ -128,6 +128,8 @@ Leave `DEBLITE_INSTALLER_REPO` empty to derive `<owner>/deblite-installer`
 from the git origin. `scripts/fetch-installer-deb.sh` downloads
 `deblite-installer_<version>_amd64.deb` and verifies it against the release's
 `SHA256SUMS`; set `DEBLITE_INSTALLER_SHA256` to hard-pin the checksum instead.
+Set `DEBLITE_INSTALLER_BASE_URL` to mirror the release assets elsewhere (and
+to exercise the download/checksum path in tests).
 
 For offline development, use a package built from the installer checkout:
 

@@ -18,6 +18,9 @@ release is pinned by installer-release.env; command-line flags and the
 DEBLITE_INSTALLER_* environment variables override it.
 
   --deb FILE   use a local .deb instead of downloading one
+
+DEBLITE_INSTALLER_BASE_URL overrides the release URL, which is useful for
+mirrors and for exercising the download/checksum path in tests.
 EOF
 }
 
@@ -95,7 +98,8 @@ if [ -n "$DEB_OVERRIDE" ]; then
     echo "==> using local installer: $DEB_OVERRIDE"
     cp "$DEB_OVERRIDE" "$DEB"
 else
-    BASE="https://github.com/$REPO/releases/download/installer-v${VERSION}"
+    BASE=${DEBLITE_INSTALLER_BASE_URL:-https://github.com/$REPO/releases/download/installer-v${VERSION}}
+    BASE=${BASE%/}
     echo "==> downloading $BASE/$NAME"
     curl -fL --retry 3 --connect-timeout 10 --max-time 300 -o "$DEB" "$BASE/$NAME"
 
