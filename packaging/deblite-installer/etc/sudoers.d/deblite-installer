@@ -1,3 +1,0 @@
-# Only the live session account may call the privileged installer helper.
-# The package is removed from the installed system by the installer itself.
-user ALL=(root) NOPASSWD: /usr/bin/deblite-installer

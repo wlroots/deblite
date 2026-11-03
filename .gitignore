@@ -1,12 +1,10 @@
-# Python
+# Python (arch-installer reference implementation)
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
 .pytest_cache/
 .ruff_cache/
-build/
-dist/
 
 # Build output
 /build/

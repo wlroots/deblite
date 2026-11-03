@@ -30,6 +30,8 @@ jobs:
     container:
       image: debian:trixie
       options: --privileged
+    env:
+      DEBLITE_INSTALLER_REPO: ${{ github.repository_owner }}/deblite-installer
     strategy:
       fail-fast: false
       matrix:
@@ -65,8 +67,7 @@ jobs:
             live-build debootstrap xorriso squashfs-tools \
             syslinux syslinux-common isolinux \
             grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
-            rsync curl ca-certificates gnupg \
-            python3-pytest shellcheck
+            rsync curl ca-certificates gnupg
 
       - name: show disk space
         if: steps.gate.outputs.run == 'true'

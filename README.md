@@ -4,9 +4,10 @@ DebLite is a lean Debian 13 (Trixie) desktop distribution with a custom
 installer. It is built with Debian's own `live-build`, ships one ISO per
 edition, and deliberately installs **no recommends and no suggests**.
 
-The original Arch installer in `arch-installer/` is kept as the reference
-implementation. The production installer lives in `installer/` and targets
-Debian.
+The install path is provided by the standalone
+[`deblite-installer`](https://github.com/deblite/deblite-installer) project;
+the ISO build consumes a pinned `.deb` release. The original Arch installer
+in `arch-installer/` is kept as the reference implementation.
 
 ## Editions
 
@@ -41,14 +42,12 @@ them sneaks in through a dependency.
 ## Repository layout
 
 ```
-installer/                  UI-agnostic core + CLI + GTK4 frontend
-packaging/deblite-installer/  the .deb installed into the live ISO
+installer-release.env       pinned deblite-installer release and checksum
 config/common/              shared package lists, hooks, includes
 config/flavors/<name>/      per-edition packages, theming, autologin
-scripts/                    build, verify, audit, release helpers
-tests/                      pytest suite (including a full dry-run)
+scripts/                    build, fetch, verify, audit, release helpers
 .github/workflows/          CI, ISO matrix, Debian point-release watcher
-docs/                       build, installer, flavors and CI notes
+docs/                       build, flavors and CI notes
 ```
 
 ## Quick start
@@ -59,13 +58,15 @@ Build prerequisites on Debian 13:
 sudo apt-get install live-build debootstrap xorriso squashfs-tools \
     syslinux syslinux-common isolinux \
     grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
-    rsync curl ca-certificates gnupg python3-pytest shellcheck
+    rsync curl ca-certificates gnupg shellcheck
 ```
 
-Run the tests and build one edition:
+The build downloads the installer pinned in `installer-release.env` from its
+GitHub Release and verifies it against the release's `SHA256SUMS`. Run the
+shell checks and build one edition:
 
 ```sh
-make test
+make check
 sudo make iso FLAVOR=kde
 ```
 
@@ -91,6 +92,12 @@ sudo ./scripts/build-iso.sh cinnamon --release
 
 ## Installer
 
+The installer is a separate project,
+[`deblite-installer`](https://github.com/deblite/deblite-installer). This
+repository pins one of its release `.deb` files in `installer-release.env`
+and downloads it during `build-iso.sh`; ISO builds never compile the
+installer from source.
+
 The live session logs in automatically as `user` and starts the GTK4 wizard.
 The GUI is unprivileged; it sends a JSON config to the privileged helper:
 
@@ -110,22 +117,29 @@ Headless (CI / automation):
 sudo deblite-installer --headless --config install.json --yes
 ```
 
-Dry-run anywhere (no root, no disk writes):
+To work on the installer itself:
 
 ```sh
+git clone https://github.com/deblite/deblite-installer
+cd deblite-installer
+make test
 ./bin/deblite-installer --headless --config install.json --debug
 ```
 
-See [`docs/INSTALLER.md`](docs/INSTALLER.md) for the JSON schema, partition
-layout, LUKS behaviour and the de-live cleanup.
+See the [installer docs](https://github.com/deblite/deblite-installer/blob/main/docs/INSTALLER.md)
+for the JSON schema, partition layout, LUKS behaviour and de-live cleanup.
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` — tests, lint, `.deb` build.
+- `.github/workflows/ci.yml` — `shellcheck` plus a check that the pinned
+  installer release and its `SHA256SUMS` are downloadable.
 - `.github/workflows/build.yml` — matrix build of all editions on pushes,
   tags and manual runs; publishes a GitHub Release on tags.
 - `.github/workflows/check-debian.yml` — daily check for a new Debian 13
   point release; tags it so the build workflow publishes it.
+- The installer has its own CI and tag-driven `.deb` release workflow in
+  `deblite-installer`; publish `installer-vX.Y.Z` there, then bump
+  `installer-release.env` here.
 
 See [`docs/CI.md`](docs/CI.md).
 

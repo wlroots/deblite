@@ -11,7 +11,7 @@ sudo apt-get install -y --no-install-recommends \
     syslinux syslinux-common isolinux \
     grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
     rsync curl ca-certificates gnupg \
-    python3-pytest shellcheck
+    shellcheck
 ```
 
 `live-build` must run as root because it creates chroots, mounts filesystems
@@ -112,8 +112,32 @@ Debian ships `mint-y-icons` but neither `mint-themes` nor its
 `mint-x-icons_*_all.deb` from the Linux Mint package repository and places
 both in `config/packages.chroot/`.
 
-The DebLite installer itself is built by
-`scripts/build-installer-deb.sh` and also placed in `packages.chroot`.
+## Installer package
+
+The installer lives in its own repository, `deblite-installer`, and is
+published as a `.deb` on `installer-vX.Y.Z` tags. This repository pins the
+release in `installer-release.env`:
+
+```sh
+DEBLITE_INSTALLER_REPO=          # <owner>/deblite-installer; empty derives from origin
+DEBLITE_INSTALLER_VERSION=0.1.0
+DEBLITE_INSTALLER_SHA256=
+```
+
+Leave `DEBLITE_INSTALLER_REPO` empty to derive `<owner>/deblite-installer`
+from the git origin. `scripts/fetch-installer-deb.sh` downloads
+`deblite-installer_<version>_amd64.deb` and verifies it against the release's
+`SHA256SUMS`; set `DEBLITE_INSTALLER_SHA256` to hard-pin the checksum instead.
+
+For offline development, use a package built from the installer checkout:
+
+```sh
+DEBLITE_INSTALLER_DEB=/path/to/deblite-installer_0.1.0_amd64.deb \
+    sudo -E ./scripts/build-iso.sh kde
+```
+
+Publish the installer release first, then bump `DEBLITE_INSTALLER_VERSION`
+here. ISO builds no longer compile the installer.
 
 ## Verification
 
@@ -157,9 +181,10 @@ sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso --luks
 sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso --boot
 ```
 
-The script partitions a sparse image, copies the ISO's squashfs, runs the
-headless installer, then mounts the result and checks GRUB, fstab, the user
-account, the hostname and that the live packages are gone. `--boot` also
-starts the installed root filesystem in QEMU with a serial console (non-LUKS
-only). It forces the BIOS layout so it cannot write NVRAM entries on the build
-host. Test UEFI boot and the GRUB menu in a VM.
+The script partitions a sparse image, copies the ISO's squashfs, extracts the
+installer bundle from that squashfs, runs it in headless mode, then mounts the
+result and checks GRUB, fstab, the user account, the hostname and that the
+live packages are gone. `--boot` also starts the installed root filesystem in
+QEMU with a serial console (non-LUKS only). It forces the BIOS layout so it
+cannot write NVRAM entries on the build host. Test UEFI boot and the GRUB menu
+in a VM.

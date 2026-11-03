@@ -162,8 +162,8 @@ mkdir -p "$BUILD/config/includes.chroot/etc"
 printf '%s\n' "$FLAVOR" >"$BUILD/config/includes.chroot/etc/deblite-flavor"
 mkdir -p "$BUILD/config/packages.chroot"
 
-echo "==> building deblite-installer.deb"
-"$ROOT/scripts/build-installer-deb.sh" \
+echo "==> fetching deblite-installer.deb"
+"$ROOT/scripts/fetch-installer-deb.sh" \
     --output "$BUILD/config/packages.chroot/deblite-installer_amd64.deb"
 
 echo "==> fetching vendored packages"

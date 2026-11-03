@@ -8,7 +8,6 @@
 #   sudo ./scripts/test-install.sh out/deblite-13-xfce-amd64.iso [--luks] [--boot]
 set -euo pipefail
 
-ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 ISO=${1:-}
 shift || true
 LUKS=0
@@ -64,6 +63,14 @@ FLAVOR=$(unsquashfs -cat "$SQUASHFS" etc/deblite-flavor 2>/dev/null | head -n1)
 FLAVOR=${FLAVOR:-unknown}
 echo "==> edition baked into the ISO: $FLAVOR"
 
+INSTALLER_ROOT="$WORK/installer-root"
+echo "==> extracting the installer bundled in the ISO"
+unsquashfs -f -d "$INSTALLER_ROOT" "$SQUASHFS" usr/lib/deblite-installer >/dev/null
+if [ ! -d "$INSTALLER_ROOT/usr/lib/deblite-installer/installer" ]; then
+    echo "FAIL: the ISO does not contain the deblite-installer package" >&2
+    exit 1
+fi
+
 echo "==> creating a 12 GiB sparse disk image"
 truncate -s 12G "$DISK"
 LOOP=$(losetup --find --show --partscan "$DISK")
@@ -105,7 +112,8 @@ cat >"$CONFIG" <<EOF
 EOF
 
 echo "==> running the installer"
-"$ROOT/bin/deblite-installer" --headless --config "$CONFIG" --yes
+PYTHONPATH="$INSTALLER_ROOT/usr/lib/deblite-installer" \
+    python3 -m installer.cli.main --headless --config "$CONFIG" --yes
 
 echo "==> inspecting the installed system"
 ROOT_DEV=$(lsblk -no PATH,PARTLABEL "$LOOP" | awk '$2 == "DEBLITE_ROOT" { print $1 }')
