@@ -12,10 +12,12 @@ Runs on every push and pull request:
 - `shellcheck scripts/*.sh`
 - `scripts/fetch-installer-deb.sh` against the pinned installer release, then
   `dpkg-deb --info`/`--contents` on the result
+- `scripts/fetch-artwork.sh` against the pinned artwork release, which also
+  checks its `SHA256SUMS`
 
-The second job deliberately fails if the pinned `installer-vX.Y.Z` release or
-its `SHA256SUMS` asset is missing, because `build.yml` would fail the same
-way.
+The release-check jobs deliberately fail if the pinned `installer-vX.Y.Z` or
+`artwork-vX.Y.Z` release or its `SHA256SUMS` asset is missing, because
+`build.yml` would fail the same way.
 
 ### `build.yml`
 
@@ -36,9 +38,12 @@ mounts, loop devices and chroot). Steps:
 2. Download the installer `.deb` pinned in `installer-release.env` and verify
    its checksum. `DEBLITE_INSTALLER_REPO` is set to
    `<repository owner>/deblite-installer`.
-3. `scripts/build-iso.sh <flavor> --release` (xz) or zstd for PRs.
-4. `verify-iso.sh` and `audit-bloat.sh`.
-5. Upload the ISO, `.sha256` and `.manifest.json` as artifacts.
+3. Download the artwork tarball pinned in `artwork-release.env` and verify its
+   checksum. `DEBLITE_ARTWORK_REPO` is set to
+   `<repository owner>/deblite-artwork`.
+4. `scripts/build-iso.sh <flavor> --release` (xz) or zstd for PRs.
+5. `verify-iso.sh` and `audit-bloat.sh`.
+6. Upload the ISO, `.sha256` and `.manifest.json` as artifacts.
 
 The release job runs on tags or `release=true`, downloads all artifacts and
 publishes one GitHub Release with all four ISOs.
@@ -86,6 +91,34 @@ git push origin main installer-v0.2.0
 Then update `DEBLITE_INSTALLER_VERSION` in `installer-release.env` here and
 commit. The next ISO build downloads and verifies the new package.
 
+## Artwork repository workflows
+
+Artwork lives in `deblite-artwork`.
+
+### `ci.yml`
+
+Runs on pushes to `main` and pull requests: `shellcheck`, a test archive build
+and a contents check.
+
+### `release.yml`
+
+Runs when a tag matching `artwork-v*` is pushed:
+
+1. Rejects the tag unless it matches `VERSION`.
+2. Builds `deblite-artwork-<version>.tar.gz`.
+3. Publishes a GitHub Release with the tarball and `SHA256SUMS`.
+
+To ship new wallpapers:
+
+```sh
+cd deblite-artwork
+# add images, bump VERSION, commit
+git tag artwork-v0.2.0
+git push origin main artwork-v0.2.0
+```
+
+Then update `DEBLITE_ARTWORK_VERSION` in `artwork-release.env` here and commit.
+
 ## Release assets
 
 Each ISO release contains:
@@ -105,6 +138,13 @@ deblite-installer_<version>_amd64.deb
 SHA256SUMS
 ```
 
+Each artwork release contains:
+
+```
+deblite-artwork-<version>.tar.gz
+SHA256SUMS
+```
+
 GitHub's hard limit is **2 GiB per asset**. `build-iso.sh --release` checks
 the measured size and exits non-zero before upload if it is at or above the
 limit. If that happens, the options are:
@@ -120,6 +160,7 @@ obvious and early.
 - ISO repo: `contents: write` for the release job and the point-release tag.
 - ISO repo: `actions: write` if the watcher uses `gh workflow run`.
 - Installer repo: `contents: write` for `release.yml`.
+- Artwork repo: `contents: write` for `release.yml`.
 - `GITHUB_TOKEN` is sufficient; no extra secrets are needed.
 
 ## Local reproduction
@@ -136,4 +177,12 @@ predictor of a green workflow. Installer work uses its own repository:
 cd ../deblite-installer
 make test
 make deb
+```
+
+Artwork work uses its own repository too:
+
+```sh
+cd ../deblite-artwork
+make check
+make dist
 ```

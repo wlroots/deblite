@@ -17,11 +17,11 @@ check:
 	shellcheck scripts/*.sh
 
 iso:
-	sudo ./scripts/build-iso.sh $(FLAVOR)
+	sudo -E ./scripts/build-iso.sh $(FLAVOR)
 
 all:
 	@set -e; for flavor in $(FLAVORS); do \
-		sudo ./scripts/build-iso.sh $$flavor --release; \
+		sudo -E ./scripts/build-iso.sh $$flavor --release; \
 	done
 
 verify:

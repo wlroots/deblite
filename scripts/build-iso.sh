@@ -162,9 +162,22 @@ mkdir -p "$BUILD/config/includes.chroot/etc"
 printf '%s\n' "$FLAVOR" >"$BUILD/config/includes.chroot/etc/deblite-flavor"
 
 echo "==> installing optional artwork"
+# Prefer an explicit local directory, then the pinned artwork release. Fall
+# back to a sibling checkout so development builds keep working before the
+# release exists.
+artwork_dir=""
+if [ -n "${DEBLITE_ARTWORK_DIR:-}" ]; then
+    artwork_dir=$DEBLITE_ARTWORK_DIR
+elif "$ROOT/scripts/fetch-artwork.sh" --output "$ROOT/build/artwork"; then
+    artwork_dir=$ROOT/build/artwork/wallpapers
+else
+    artwork_dir=$ROOT/../deblite-artwork/wallpapers
+    echo "warning: no pinned artwork release available; using $artwork_dir" >&2
+fi
 "$ROOT/scripts/install-artwork.sh" \
     --flavor "$FLAVOR" \
-    --config "$BUILD/config"
+    --config "$BUILD/config" \
+    --artwork-dir "$artwork_dir"
 
 mkdir -p "$BUILD/config/packages.chroot"
 

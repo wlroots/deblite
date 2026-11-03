@@ -97,8 +97,17 @@ if [ -f "$firmware_list" ]; then
     done <"$firmware_list"
 fi
 
-# When artwork is available locally, the matching ISO must contain it.
-artwork_dir=${DEBLITE_ARTWORK_DIR:-$ROOT/../deblite-artwork/wallpapers}
+# When artwork is available locally, the matching ISO must contain it. The
+# build caches the pinned release in build/artwork; a sibling checkout is the
+# development fallback.
+artwork_dir=${DEBLITE_ARTWORK_DIR:-}
+if [ -z "$artwork_dir" ]; then
+    if [ -d "$ROOT/build/artwork/wallpapers" ]; then
+        artwork_dir=$ROOT/build/artwork/wallpapers
+    else
+        artwork_dir=$ROOT/../deblite-artwork/wallpapers
+    fi
+fi
 artwork=0
 if [ -d "$artwork_dir" ] &&
     find "$artwork_dir" -maxdepth 1 -type f \

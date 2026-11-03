@@ -40,3 +40,23 @@ jobs:
           ./scripts/fetch-installer-deb.sh --output "$RUNNER_TEMP/deblite-installer.deb"
           dpkg-deb --info "$RUNNER_TEMP/deblite-installer.deb"
           dpkg-deb --contents "$RUNNER_TEMP/deblite-installer.deb"
+
+  artwork-release:
+    runs-on: ubuntu-latest
+    env:
+      DEBLITE_ARTWORK_REPO: ${{ github.repository_owner }}/deblite-artwork
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl
+
+      # Fails if the pinned artwork release or its SHA256SUMS is missing,
+      # which is exactly what the ISO build would do.
+      - name: fetch the pinned artwork
+        run: |
+          ./scripts/fetch-artwork.sh --output "$RUNNER_TEMP/artwork"
+          test -d "$RUNNER_TEMP/artwork/wallpapers"
+          find "$RUNNER_TEMP/artwork/wallpapers" -maxdepth 1 -type f -print

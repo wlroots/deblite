@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Install optional DebLite artwork into a live-build configuration tree.
+# Install DebLite artwork into a live-build configuration tree.
 #
-# Wallpapers are not committed to this repository. Drop images into
-# ../deblite-artwork/wallpapers (or set DEBLITE_ARTWORK_DIR) before building
-# and this script copies them into the image and makes one of them the default
-# for KDE Plasma, GNOME, XFCE or Cinnamon. Without artwork every edition keeps
-# its built-in wallpaper.
+# The ISO build normally fetches the pinned deblite-artwork release first and
+# passes its wallpapers/ directory here. For development, pass
+# DEBLITE_ARTWORK_DIR or --artwork-dir to use a local checkout. Without
+# artwork every edition keeps its built-in wallpaper.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -16,11 +15,11 @@ CONFIG=""
 
 usage() {
     cat <<EOF
-usage: $0 --flavor FLAVOR --config DIR
+usage: $0 --flavor FLAVOR --config DIR [--artwork-dir DIR]
 
-Copies wallpapers from \$DEBLITE_ARTWORK_DIR
-(default: $ROOT/../deblite-artwork/wallpapers) into the live-build
-configuration at DIR and selects a default wallpaper for the edition.
+Copies wallpapers from DIR (default: \$DEBLITE_ARTWORK_DIR, then
+$ROOT/../deblite-artwork/wallpapers) into the live-build configuration at
+the given --config directory and selects a default wallpaper for the edition.
 
 Environment:
   DEBLITE_ARTWORK_DIR   wallpaper directory
@@ -37,6 +36,10 @@ while [ $# -gt 0 ]; do
             ;;
         --config)
             CONFIG=$2
+            shift 2
+            ;;
+        --artwork-dir)
+            ARTWORK_DIR=$2
             shift 2
             ;;
         -h|--help)

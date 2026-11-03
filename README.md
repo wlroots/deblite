@@ -424,11 +424,12 @@ sudo make all                 # all four release ISOs, xz
 Output lands in `out/` as the ISO, its `.sha256` and a `.manifest.json`.
 Release builds enforce GitHub's 2 GiB per-asset limit.
 
-Every edition can use custom wallpapers. Put images in
-`../deblite-artwork/wallpapers` (or set `DEBLITE_ARTWORK_DIR`), optionally
-pick one with `DEBLITE_WALLPAPER`, and build with `sudo -E`. KDE, GNOME,
-XFCE and Cinnamon each receive a system-wide default; without artwork they
-keep their built-in wallpaper. See
+Every edition uses the wallpapers from the separate
+[`deblite-artwork`](https://github.com/wlroots/deblite-artwork) repository,
+pinned and checksum-verified by the build. For local builds, point
+`DEBLITE_ARTWORK_DIR` at a checkout or `DEBLITE_ARTWORK_ARCHIVE` at a release
+tarball and use `sudo -E`. KDE, GNOME, XFCE and Cinnamon each receive a
+system-wide default; without artwork they keep their built-in wallpaper. See
 [`docs/BUILD.md`](docs/BUILD.md#artwork).
 
 The installer is a separate project,

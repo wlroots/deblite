@@ -32,6 +32,7 @@ jobs:
       options: --privileged
     env:
       DEBLITE_INSTALLER_REPO: ${{ github.repository_owner }}/deblite-installer
+      DEBLITE_ARTWORK_REPO: ${{ github.repository_owner }}/deblite-artwork
     strategy:
       fail-fast: false
       matrix:

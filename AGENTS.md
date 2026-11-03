@@ -65,6 +65,10 @@ These are product requirements, not preferences:
 - **Installer downloads are verified.** `scripts/fetch-installer-deb.sh` must
   validate the `.deb` against the release `SHA256SUMS` (or
   `DEBLITE_INSTALLER_SHA256`) before it is placed in `packages.chroot`.
+- **Artwork is external and pinned.** Wallpapers live in `deblite-artwork` and
+  enter the build through `scripts/fetch-artwork.sh`, which verifies the
+  tarball against the release `SHA256SUMS` (or `DEBLITE_ARTWORK_SHA256`). Do not
+  commit wallpaper binaries to this repository.
 - **Root filesystem is copied, not bootstrapped.** The installer unsquashes the
   live `filesystem.squashfs`; it does not use `debootstrap`, `pacstrap` or
   network installs.
@@ -86,7 +90,8 @@ These are product requirements, not preferences:
 | `config/common/` | Shared package lists, hooks, includes and live-build preseed |
 | `config/flavors/<name>/` | Per-edition packages, theming and autologin |
 | `scripts/build-iso.sh` | Main ISO build; re-executes itself with `sudo` |
-| `scripts/install-artwork.sh` | Copies optional wallpapers into the build |
+| `scripts/install-artwork.sh` | Copies pinned wallpapers into the build |
+| `scripts/fetch-artwork.sh` | Downloads and verifies the pinned artwork |
 | `scripts/fetch-installer-deb.sh` | Downloads and verifies the pinned installer |
 | `scripts/fetch-vendor-debs.sh` | Vendors Mint theme packages for Cinnamon |
 | `scripts/verify-iso.sh` | Static checks for required/forbidden ISO contents |
@@ -95,6 +100,7 @@ These are product requirements, not preferences:
 | `scripts/qemu-smoke.sh` | Boots the live kernel/initramfs in QEMU |
 | `scripts/check-debian-release.sh` | Detects new Debian 13 point releases |
 | `installer-release.env` | Pinned installer repo/version/checksum |
+| `artwork-release.env` | Pinned artwork repo/version/checksum |
 | `debian-version.txt` | Debian 13 point release baked into manifests |
 | `.github/workflows/` | CI, ISO matrix, release publishing, Debian watcher |
 | `docs/` | Build, CI and flavor documentation |
@@ -107,6 +113,7 @@ Run these from the repository root. Build and install tests need root.
 ```sh
 make check                                      # shellcheck all scripts
 ./scripts/fetch-installer-deb.sh --output /tmp/installer.deb
+./scripts/fetch-artwork.sh --output /tmp/artwork
 sudo ./scripts/build-iso.sh xfce                # zstd, development build
 sudo ./scripts/build-iso.sh kde --release       # xz + 2 GiB guard
 sudo make all                                   # all four release ISOs
@@ -125,6 +132,15 @@ DEBLITE_INSTALLER_DEB=/path/to/deblite-installer_0.1.0_amd64.deb \
 
 `DEBLITE_INSTALLER_BASE_URL` can point at a mirror (or a `file://` directory)
 to exercise the download and checksum path without publishing a release.
+
+For offline artwork, use a local directory or a locally built tarball:
+
+```sh
+DEBLITE_ARTWORK_DIR=../deblite-artwork/wallpapers \
+    sudo -E ./scripts/build-iso.sh xfce
+DEBLITE_ARTWORK_ARCHIVE=/tmp/deblite-artwork-0.1.0.tar.gz \
+    sudo -E ./scripts/build-iso.sh xfce
+```
 
 ## Testing expectations
 
@@ -218,6 +234,21 @@ The installer is a separate repository. Do not patch it from here.
   `DEBLITE_INSTALLER_VERSION` in `installer-release.env` here and rebuild.
 - Keep `installer-release.env` honest. Do not point it at a tag that has not
   been published; CI downloads the pinned release on every push.
+
+## Artwork changes
+
+Wallpapers live in a separate repository, not here.
+
+- Source: <https://github.com/wlroots/deblite-artwork>
+- Local sibling checkout for development: `../deblite-artwork`
+- Layout: `wallpapers/`, `VERSION`, `scripts/build-artwork-archive.sh`
+- Archive: `deblite-artwork-X.Y.Z.tar.gz` containing `wallpapers/`, `README.md`
+  and `LICENSE`.
+- Release tags: `artwork-vX.Y.Z`, matching `VERSION`.
+- To consume new artwork: publish the release in that repository, then bump
+  `DEBLITE_ARTWORK_VERSION` in `artwork-release.env` here.
+- Keep `artwork-release.env` honest. CI downloads the pinned release and fails
+  if it or `SHA256SUMS` is missing.
 
 ## Releases
 

@@ -150,10 +150,13 @@ both in `config/packages.chroot/`.
 
 ## Artwork
 
-Custom wallpapers are not stored in this repository. Drop images into
-`../deblite-artwork/wallpapers` (a sibling of this checkout) before building,
-or point `DEBLITE_ARTWORK_DIR` at another directory. `scripts/install-artwork.sh`
-copies the supported images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`) into
+Wallpapers live in the separate
+[`deblite-artwork`](https://github.com/wlroots/deblite-artwork) repository and
+are published as `deblite-artwork-X.Y.Z.tar.gz` on `artwork-vX.Y.Z` tags. This
+repository pins the release in `artwork-release.env`; `scripts/fetch-artwork.sh`
+downloads the tarball, verifies it against the release `SHA256SUMS`, and
+extracts it to `build/artwork/`. `scripts/install-artwork.sh` then copies the
+supported images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`) into
 `/usr/share/backgrounds/deblite/` and selects one as the default in every
 edition:
 
@@ -170,8 +173,25 @@ edition:
 
 `DEBLITE_WALLPAPER` selects the default by file name; without it the first
 image in sort order wins. Both variables must survive `sudo`, so use
-`sudo -E` or pass them inline. The script is a no-op when the directory or
-the images are missing, and every edition then keeps its built-in wallpaper.
+`sudo -E` or pass them inline.
+
+For development, skip the download with either a local checkout or a locally
+built tarball:
+
+```sh
+DEBLITE_ARTWORK_DIR=../deblite-artwork/wallpapers \
+    sudo -E ./scripts/build-iso.sh xfce
+
+DEBLITE_ARTWORK_ARCHIVE=/tmp/deblite-artwork-0.1.0.tar.gz \
+    sudo -E ./scripts/build-iso.sh xfce
+```
+
+If neither is set and the pinned release cannot be downloaded, the build falls
+back to `../deblite-artwork/wallpapers`. The artwork stage is a no-op when no
+images are available, and every edition then keeps its built-in wallpaper.
+
+To ship new artwork, tag and publish a release in `deblite-artwork`, then bump
+`DEBLITE_ARTWORK_VERSION` in `artwork-release.env` here.
 
 ## Installer package
 
