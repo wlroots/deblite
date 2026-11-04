@@ -32,6 +32,7 @@ xdg-desktop-portal-gtk
 power-profiles-daemon
 at-spi2-core
 zenity
+celluloid
 
 # X11 / Wayland stack
 xserver-xorg

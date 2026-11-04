@@ -11,6 +11,7 @@ xfce4-appfinder
 xfce4-clipman-plugin
 xfce4-taskmanager
 xfce4-systemload-plugin
+xfce4-whiskermenu-plugin
 network-manager-gnome
 blueman
 pavucontrol
@@ -35,3 +36,8 @@ xserver-xorg-video-all
 x11-xserver-utils
 x11-utils
 x11-xkb-utils
+
+# Default apps
+ristretto
+celluloid
+atril

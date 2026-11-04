@@ -22,6 +22,9 @@ xwayland
 kde-cli-tools
 udisks2
 upower
+gwenview
+haruna
+okular
 
 # X11 stack
 xserver-xorg

@@ -39,3 +39,12 @@ xserver-xorg-video-all
 x11-xserver-utils
 x11-utils
 x11-xkb-utils
+
+# Default apps
+celluloid
+gedit
+eog
+atril
+
+# Screenshooter
+gnome-screenshot
